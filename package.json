@@ -1,0 +1,40 @@
+{
+  "name": "imageboard-theme",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack --watch",
+    "build": "webpack --mode production",
+    "tailwind": "tailwindcss -i ./frontend/tailwind.css -o ./build/output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.20.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "react": "^19.2.8",
+    "react-router": "^8.3.1",
+    "tailwindcss": "^4.3.3",
+    "webpack": "^5.110.2"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^8.0.2",
+    "@babel/preset-react": "^8.0.1",
+    "@babel/preset-typescript": "^8.0.1",
+    "@types/react": "^19.2.18",
+    "@types/react-router": "^5.1.20",
+    "babel-loader": "^10.1.1",
+    "react-dom": "^19.2.8",
+    "typescript": "^7.0.2",
+    "webpack-cli": "^7.2.3"
+  }
+}
