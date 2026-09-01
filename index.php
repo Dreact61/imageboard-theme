@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест React + Tailwind</title>
+    <title>D-Chan</title>
     <!-- Жестко подключаем только что собранный CSS -->
     <link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/build/output.css?v=<?php echo time(); ?>">
 </head>

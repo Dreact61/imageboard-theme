@@ -16,7 +16,17 @@
   \*************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
-eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ MainPage)\n/* harmony export */ });\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"./node_modules/.pnpm/react@19.2.8/node_modules/react/jsx-dev-runtime.js\");\n\nfunction MainPage() {\n  return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"div\", {\n    children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"h1\", {\n      className: \"bg-amber-400\",\n      children: \"Hello World!\"\n    }, void 0, false)\n  }, void 0, false);\n}\n\n//# sourceURL=webpack://imageboard-theme/./frontend/Pages/mainPage.tsx?\n}");
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ MainPage)\n/* harmony export */ });\n/* harmony import */ var _Parts_header__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Parts/header */ \"./frontend/Parts/header.jsx\");\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"./node_modules/.pnpm/react@19.2.8/node_modules/react/jsx-dev-runtime.js\");\n\n\nfunction MainPage() {\n  return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxDEV)(\"div\", {\n    children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxDEV)(_Parts_header__WEBPACK_IMPORTED_MODULE_0__[\"default\"], {}, void 0, false)\n  }, void 0, false);\n}\n\n//# sourceURL=webpack://imageboard-theme/./frontend/Pages/mainPage.tsx?\n}");
+
+/***/ },
+
+/***/ "./frontend/Parts/header.jsx"
+/*!***********************************!*\
+  !*** ./frontend/Parts/header.jsx ***!
+  \***********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ Header)\n/* harmony export */ });\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"./node_modules/.pnpm/react@19.2.8/node_modules/react/jsx-dev-runtime.js\");\n\nfunction Header() {\n  return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"header\", {\n    className: \"flex flex-col m-auto w-1/2 items-center justify-between\",\n    children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"h2\", {\n      className: \"text-2xl\",\n      children: \"D-Chan\"\n    }, void 0, false), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"img\", {\n      src: \"../../public/pictures/ico.png\",\n      alt: \"Imageboard picture\"\n    }, void 0, false)]\n  }, void 0, true);\n}\n\n//# sourceURL=webpack://imageboard-theme/./frontend/Parts/header.jsx?\n}");
 
 /***/ },
 
