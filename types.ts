@@ -12,7 +12,7 @@ export type Board = {
     name: string,
     description: string,
     mark: string,
-    author: string,
+    author: number | string,
     createdAt: Date
 }
 
@@ -21,7 +21,7 @@ export type Thread = {
     name: string,
     description: string,
     parent: number | string, //id | mark
-    author: string,
+    author: string | number | null,
     createdAt: Date,
     status: 'PRIVATE' | 'PUBLIC'
 }
