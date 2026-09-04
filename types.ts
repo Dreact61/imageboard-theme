@@ -29,7 +29,7 @@ export type Thread = {
 export type Post = {
     id?: number,
     content: string,
-    author: string | 'Anonymous',
+    author?: string | 'Anonymous',
     createdAt: Date,
     parent: number // Thread.id
 }

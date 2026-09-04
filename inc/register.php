@@ -2,19 +2,19 @@
     function register_boards_api(WP_REST_REQUEST $request) {
         $params = $request->get_json_params();
 
-        if (empty($params['title']) || empty($params['mark'])):
-            return new WP_Error('missing_fields', 'Не все важные поля не были заполнены', array("status" => 400));
-        endif;
+        if (empty($params['title']) || empty($params['mark'])) {
+            return new WP_Error('missing_fields', 'Не все важные поля были заполнены', array("status" => 400));
+        }
         
-        $name = sanitize_text_field($params['username']);
-        $description = empty($params['description']) ? '' : sanitize_text_field($params['description']);
+        $name = sanitize_text_field($params['title']);
+        $description = empty($params['description']) ? '' : sanitize_textarea_field($params['description']);
         $mark = sanitize_text_field($params['mark']);
         $author_id = get_current_user_id();
         $createdAt = empty($params['createdAt']) ? 'N/A' : sanitize_text_field($params['createdAt']);
 
-        if(empty($author_id)):
+        if(empty($author_id)) {
             return new WP_Error('author_not_defined', 'Пользователь не найден или не зарегистрирован', array("status" => 401));
-        endif;
+        }
 
         $post_id = wp_insert_post([
             'post_type' => 'board',
@@ -29,9 +29,9 @@
             ],
         ]);
 
-        if (is_wp_error($post_id)):
+        if (is_wp_error($post_id)) {
             return new WP_Error('server_error', 'Ошибка на строне сервера', ["status" => 500]);
-        endif;
+        }
 
         $result = [
             'id' => $post_id,
@@ -39,13 +39,13 @@
             'description' => $description,
             'mark' => $mark,
             'author' => $author_id,
-            'createdAt' => $createdAt
+            'createdAt' => $createdAt,
         ];
 
         return new WP_REST_Response([
             'success' => true,
             'board_data' => $result,
-        ]);
+        ], 201);
     }
 
     //------
@@ -53,9 +53,10 @@
     function imageboard_create_thread(WP_REST_Request $request) {
         $params = $request->get_json_params();
         $board_id = absint($params['parent']);
+        $author = empty($params['author']) ? 'Anonymous' : sanitize_text_field($params['author']);
 
         if (empty($params['name']) || empty($params['parent'])) {
-            return new WP_Error('missing_fields', "Не все важные поля не были заполнены", ["status" => 400]);
+            return new WP_Error('missing_fields', "Не все важные поля были заполнены", ["status" => 400]);
         }
 
         $board = get_post($board_id);
@@ -64,10 +65,10 @@
         }
 
         $name = sanitize_text_field($params['name']);
-        $description = sanitize_text_field($params) ?? '';
-        $author_id = get_current_user_id() ?? 0;
-        $createdAt = sanitize_text_field($params['createdAt']) ?? 'N/A';
-        $status = sanitize_text_field($params['status']) ?? 'PUBLIC';
+        $description = empty($params['description']) ? '' : sanitize_textarea_field($params['description']);
+        $author_id = empty($author) ? 0 : get_current_user_id();
+        $createdAt = empty($params['createdAt']) ? 'N/A' : sanitize_text_field($params['createdAt']);
+        $status = empty($params['status']) ? 'PUBLIC' : sanitize_text_field($params['status']);
 
         $post_id = wp_insert_post([
             'post_type' => 'thread',
@@ -92,7 +93,7 @@
             'name' => $name,
             'description' => $description,
             'board_id' => $board_id,
-            'author' => $author_id,
+            'author' => $author,
             'createdAt' => $createdAt,
             'status' => $status,
         ];
@@ -100,16 +101,60 @@
         return new WP_REST_Response([
             'success' => true,
             'thread_data' => $result,
-        ]);
+        ], 201);
     }
 
     //-------
 
-    function handle_user_register($request) {
+    function imageboard_create_post(WP_REST_Request $request) {
+        $params = $request->get_json_params();
+
+        if (empty($params['content']) || empty($params['parent'])) {
+            return new WP_Error('missing_fields', 'Не все важные поля были заполнены', ["status" => 400]);
+        }
+
+        $content = sanitize_textarea_field($params['content']);
+        $author = isset($params['author']) && $params['author'] !== 'Anonymous' ? sanitize_text_field($params['author']) : 'Anonymous';
+        $createdAt = isset($params['createdAt']) ? sanitize_text_field($params['createdAt']) : 'N/A';
+        $parent = absint($params['parent']);
+
+        $post_id = wp_insert_post([
+            'post_type' => 'board_post',
+            'post_title' => "$author - $createdAt",
+            'post_content' => $content,
+            'post_status' => 'publish',
+            'post_author' => empty($author) ? 0 : get_current_user_id(),
+            'meta_input' => [
+                'post_createdAt' => $createdAt,
+                'thread_id' => $parent,
+            ],
+        ]);
+
+        if (is_wp_error($post_id)) {
+            return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500]);
+        }
+
+        $result = [
+            "id" => $post_id,
+            "content" => $content,
+            "author" => $author,
+            "createdAt" => $createdAt,
+            "parent" => $parent,
+        ];
+
+        return new WP_REST_Response([
+            'success' => true,
+            'post' => $result,
+        ], 201);
+    }
+
+    //-------
+
+    function handle_user_register(WP_REST_Request $request) {
     $params = $request->get_json_params();
 
     if (empty($params)) {
-        return new WP_Error('missing_fields', 'Не все важные поля не были заполнены', array("status" => 400));
+        return new WP_Error('missing_fields', 'Не все важные поля были заполнены', array("status" => 400));
     }
 
     $username    = sanitize_user( $params['username'] );
@@ -117,6 +162,10 @@
     $name        = !empty( $params['name'] ) ? sanitize_text_field( $params['name'] ) : $username;
     $description = !empty( $params['description'] ) ? sanitize_textarea_field( $params['description'] ) : '';
     $role = 'user';
+
+    if (!$params || !$username) {
+        return new WP_Error('missing_fields', 'Не все важные поля были заполнены', ["status" => 400]);
+    }
 
     if (username_exists($username)) {
         return new WP_Error('username_taken', 'Такое имя уже занято', array("status" => 400));
@@ -143,6 +192,9 @@
         'role' => $role,
     );
 
-    return new WP_REST_Response($response_data, 201);
+    return new WP_REST_Response([
+        'success' => true,
+        'user' => $response_data,
+    ], 201);
 }
 ?>

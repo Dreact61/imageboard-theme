@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-add_action('wp-enqueue_scripts', function() {
+add_action('wp_enqueue_scripts', function() {
     wp_enqueue_script(
         'imageboard-proj',
         get_template_directory_uri() . '/build/index.js',
@@ -28,8 +28,8 @@ add_action('wp-enqueue_scripts', function() {
     }
 });
 
-require_once __DIR__ "inc/meta.php";
-require_once __DIR__ "/inc/routes.php";
-require_once __DIR__ "/inc/register.php";
+require_once __DIR__ . "/inc/meta.php";
+require_once __DIR__ . "/inc/routes.php";
+require_once __DIR__ . "/inc/register.php";
 
 ?>
