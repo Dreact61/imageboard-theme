@@ -3,7 +3,7 @@
         $params = $request->get_json_params();
 
         if (empty($params['title']) || empty($params['mark'])) {
-            return new WP_Error('missing_fields', 'Не все важные поля были заполнены', array("status" => 400));
+            return new WP_Error('missing_fields', 'Не все важные поля были заполнены', ["status" => 400, "success" => false]);
         }
         
         $name = sanitize_text_field($params['title']);
@@ -13,7 +13,7 @@
         $createdAt = empty($params['createdAt']) ? 'N/A' : sanitize_text_field($params['createdAt']);
 
         if(empty($author_id)) {
-            return new WP_Error('author_not_defined', 'Пользователь не найден или не зарегистрирован', array("status" => 401));
+            return new WP_Error('author_not_defined', 'Пользователь не найден или не зарегистрирован', ["status" => 401, "success" => false]);
         }
 
         $post_id = wp_insert_post([
@@ -30,7 +30,7 @@
         ]);
 
         if (is_wp_error($post_id)) {
-            return new WP_Error('server_error', 'Ошибка на строне сервера', ["status" => 500]);
+            return new WP_Error('server_error', 'Ошибка на строне сервера', ["status" => 500, "success" => false]);
         }
 
         $result = [
@@ -46,6 +46,42 @@
             'success' => true,
             'board_data' => $result,
         ], 201);
+    }
+
+
+    function fetch_current_board_api(WP_REST_Request $request) {
+        $mark = $request->get_param('mark');
+
+        if(!$mark) {
+            return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400, "success" => false]);
+        }
+
+        $post = get_posts([
+            'post_type' => 'board',
+            'posts_per_page' => 1,
+            'meta_key' => 'mark',
+            'meta_value' => $mark,
+            'post_status' => 'publish'
+        ]);
+
+        if (empty($post)) {
+            return new WP_Error('board_not_found', "Доска с пометкой " . esc_html($mark) . " не найдена", ["status" => 400, "success" => false]);
+        }
+
+        $board = $post[0];
+        $result = [
+            'id' => $board->ID,
+            'name' => $board->post_title,
+            'description' => get_post_meta($board->ID, 'board_description', true),
+            'mark' => $mark,
+            'author' => $board->post_author,
+            'createdAt' => $board->post_date,
+        ];
+
+        return new WP_REST_Response([
+            'success' => true,
+            'board' => $result,
+        ], 200);
     }
 
     //------

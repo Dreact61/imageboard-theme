@@ -29,8 +29,29 @@
         ));
     });
 
+    //=========================
+    // BOARDS
+    //=========================
+
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', '/boards', [
+        register_rest_route('myapi/v1', '/boards/(?P<mark>[a-zA-Z0-9]+)', [
+            'methods' => 'WP_REST_Server::READABLE',
+            'callback' => 'fetch_current_board_api',
+            'permission_callback' => function() {
+                return current_user_can('edit_posts');
+            },
+            'args' => [
+                'mark' => [
+                    'type' => 'string',
+                    'required' => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+            ],
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/boards/create', [
             'methods' => 'POST',
             'callback' => 'register_boards_api',
             'permission_callback' => function() {
@@ -65,6 +86,10 @@
             ]
         ]); 
     }); 
+
+    //=========================
+    // THREADS
+    //=========================
 
     add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', '/threads', [
@@ -105,5 +130,9 @@
             ],
         ]);
     });
+
+    //=========================
+    // POSTS
+    //=========================
 
 ?>
