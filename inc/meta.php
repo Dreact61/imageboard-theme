@@ -24,7 +24,7 @@
             },
         ]);
 
-        register_post_meta('board', 'board_createdAt', [
+        register_post_meta('board', 'board_author', [
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
@@ -38,11 +38,11 @@
         // THREADS
         //=========================
         
-        register_post_meta('thread', 'board_id', [
-            'type' => 'integer',
+        register_post_meta('thread', 'board_mark', [
+            'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
-            'sanitize_callback' => 'absint',
+            'sanitize_callback' => 'sanitize_text_field',
             'auth_callback' => function() {
                 return true;
             },
@@ -53,16 +53,6 @@
             'single' => true,
             'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_textarea_field',
-            'auth_callback' => function() {
-                return true;
-            },
-        ]);
-
-        register_post_meta('thread', 'thread_createdAt', [
-            'type' => 'string',
-            'single' => true,
-            'show_in_rest' => true,
-            'sanitize_callback' => 'sanitize_text_field',
             'auth_callback' => function() {
                 return true;
             },
@@ -86,17 +76,7 @@
         // POSTS
         //=========================
         
-        register_post_meta('board_post', 'post_createdAt', [
-            'type' => 'string',
-            'single' => true,
-            'show_in_rest' => true,
-            'sanitize_callback' => 'sanitize_text_field',
-            'auth_callback' => function() {
-                return true;
-            },
-        ]);
-        
-        register_post_meta('board_post', 'thread_id', [
+        register_post_meta('thread_post', 'thread_id', [
             'type' => 'integer',
             'single' => true,
             'show_in_rest' => true,

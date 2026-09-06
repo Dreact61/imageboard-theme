@@ -34,7 +34,7 @@
     //=========================
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', '/boards/(?P<mark>[a-zA-Z0-9]+)', [
+        register_rest_route('myapi/v1', "/boards/(?P<mark>[a-zA-Z0-9]+)", [
             'methods' => 'WP_REST_Server::READABLE',
             'callback' => 'fetch_current_board_api',
             'permission_callback' => function() {
@@ -77,15 +77,44 @@
                     'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
-                ],
-                'createdAt' => [
-                    'type' => 'string',
-                    'required' => true,
-                    'sanitize_callback' => 'sanitize_text_field',
                 ]
             ]
         ]); 
     }); 
+
+    add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', "/boards/(?P<mark>[a-zA-Z0-9]+)/edit", [
+            'methods' => 'PUT',
+            'callback' => 'edit_current_board_api',
+            'permission_callback' => function() {
+                return current_user_can('edit_posts');
+            },
+            'args' => [
+                'name' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+                'description' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+                'mark' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field'
+                ]
+            ]
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/boards/(?P<mark>[a-zA-Z0-9]+)/delete', [
+            'methods' => 'WP_REST_Server::DELETABLE',
+
+        ]);
+    });
 
     //=========================
     // THREADS
@@ -113,11 +142,6 @@
                     'sanitize_callback' => 'absint',
                 ],
                 'author' => [
-                    'type' => 'string',
-                    'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field',
-                ],
-                'createdAt' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',

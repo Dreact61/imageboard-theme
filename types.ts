@@ -25,10 +25,11 @@ export type Store_Boards = {
     loading: boolean,
     log: Log | null,
     currentBoard: Board | null,
+    currentBoardThreads: Thread[],
     fetchThisBoard: (mark:string) => Promise<void>,
     createNewBoard: (data:Board) => Promise<void>,
-    editBoard: (mark: string) => Promise<void>,
-    deleteBoard: (mark: string) => Promise<void>
+    editBoard: (id: number, data: Board) => Promise<void>,
+    deleteBoard: (id: string) => Promise<void>
 }
 
 //=========================
@@ -39,7 +40,7 @@ export type Thread = {
     id?: number,
     name: string,
     description: string,
-    parent: number | string, //id | mark
+    parent: string, //id | mark
     author: string | number | null,
     createdAt: Date,
     status: 'PRIVATE' | 'PUBLIC'

@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import axios from "axios";
-import type {Board, Store_Boards} from "../../types";
+import type {Board, Store_Boards, Thread} from "../../types";
 
 import dotenv from 'dotenv'
-const CUSTOM_API = process.env.$CUSTOM_API
+const CUSTOM_API = process.env.CUSTOM_API
 
 const getHeaders = () => {
     const nonce = (window as any)?.wpApiSettings.nonce || ''
@@ -22,6 +22,7 @@ const storeBoards = create<Store_Boards>((set, get) => ({
     loading: false,
     log: null,
     currentBoard: null,
+    currentBoardThreads: [],
 
     fetchThisBoard: async (mark) => {
         try {
@@ -39,6 +40,7 @@ const storeBoards = create<Store_Boards>((set, get) => ({
             }
 
             const board:Board = res.data.board
+            const threads:Thread[] = res.data.threads
             if (board.createdAt instanceof Date) {
                 board.createdAt = board.createdAt.toISOString()
             }
@@ -60,6 +62,7 @@ const storeBoards = create<Store_Boards>((set, get) => ({
             set({
                 log: result_log,
                 currentBoard: currentBoard,
+                currentBoardThreads: threads
             })
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
