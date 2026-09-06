@@ -10,9 +10,9 @@
 
 #### группировки требований эндпоинтов:
 
- - Доски - (name, description?, mark, author?, createdAt?)
- - Треды - (name, description?, parent, author?, createdAt?, status?)
- - Посты - (content, author?, createdAt?, parent)
+ - Доски - (name, description?, mark, author)
+ - Треды - (name, description?, parent, author?, status?)
+ - Посты - (content, author?, parent)
  - Юзеры - (username, name?, description?, role, password?)
 
  (? - необязательные параметры)
@@ -25,7 +25,8 @@
  - `missing_fields` ("Не все важные поля были заполнены") - код 400;
  - `author_not_defined` ("Пользователь не найден или не зарегистрирован") - код 401;
  - `username_taken` ("Такое имя уже занято") - код 400;
- - `board_not_found` ("Доска не была найдена") - код 400;
+ - `board_not_found` ("Доска не была найдена") - код 404;
+ - `thread_not_found` ("Тред не был найден") - код 404
  - `not_defined` ("Недостоверные данные") - код 400;
  - `relative_threads_are_not_parsed` ("Не получилось достать треды, связанные с меткой (метка доски)") - код 404;
  - `nothing_to_change` ("Ничего не изменилось") - код 204;

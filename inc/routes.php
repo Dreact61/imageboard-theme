@@ -18,7 +18,7 @@
                 'description' => array(
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field',
+                    'sanitize_callback' => 'sanitize_textarea_field',
                 ),
                 'password' => array(
                     'required' => true,
@@ -35,7 +35,7 @@
 
     add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', "/boards/(?P<mark>[a-zA-Z0-9]+)", [
-            'methods' => 'WP_REST_Server::READABLE',
+            'methods' => WP_REST_Server::READABLE,
             'callback' => 'fetch_current_board_api',
             'permission_callback' => function() {
                 return current_user_can('edit_posts');
@@ -66,7 +66,7 @@
                 'description' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field',
+                    'sanitize_callback' => 'sanitize_textarea_field',
                 ],
                 'mark' => [
                     'type' => 'string',
@@ -98,12 +98,17 @@
                 'description' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field',
+                    'sanitize_callback' => 'sanitize_textarea_field',
                 ],
                 'mark' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field'
+                ],
+                'id' => [
+                    'type' => 'integer',
+                    'required' => true,
+                    'sanitize_callback' => 'absint'
                 ]
             ]
         ]);
@@ -111,8 +116,11 @@
 
     add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', '/boards/(?P<mark>[a-zA-Z0-9]+)/delete', [
-            'methods' => 'WP_REST_Server::DELETABLE',
-
+            'methods' => 'DELETE',
+            'callback' => 'delete_current_board_api',
+            'permission_callback' => function() {
+                return current_user_can('edit_posts');
+            }
         ]);
     });
 
@@ -121,7 +129,22 @@
     //=========================
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', '/threads', [
+        register_rest_route('myapi/v1', "/threads/(?P<id>\d+)", [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => 'fetch_current_thread_api',
+            'permission_callback' => '__return_true',
+            'args' => [
+                'mark' => [
+                    'type' => 'string',
+                    'required' => true,
+                    'sanitize_callback' => 'sanitize_text_field'
+                ]
+            ]
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/threads/create', [
             'methods' => 'POST',
             'callback' => 'imageboard_create_thread',
             'permission_callback' => '__return_true',
@@ -139,7 +162,7 @@
                 'parent' => [
                     'type' => 'integer',
                     'required' => true,
-                    'sanitize_callback' => 'absint',
+                    'sanitize_callback' => 'sanitize_text_field',
                 ],
                 'author' => [
                     'type' => 'string',
@@ -152,6 +175,39 @@
                     'sanitize_callback' => 'sanitize_text_field',
                 ],
             ],
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/threads/(?P<id>\d+)/edit', [
+            'methods' => 'PUT',
+            'callback' => 'edit_current_thread_api',
+            'permission_callback' => function() {
+                return current_user_can('edit_posts');
+            },
+            'args' => [
+                'name' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field'
+                ],
+                'description' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_textarea_field'
+                ],
+                'status' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'enum' => ['PRIVATE', 'PUBLIC']
+                ],
+                'id' => [
+                    'type' => 'integer',
+                    'required' => true,
+                    'sanitize_callback' => 'absint'
+                ]
+            ]
         ]);
     });
 

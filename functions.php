@@ -30,6 +30,8 @@ add_action('wp_enqueue_scripts', function() {
 
 require_once __DIR__ . "/inc/meta.php";
 require_once __DIR__ . "/inc/routes.php";
-require_once __DIR__ . "/inc/register.php";
-
+require_once __DIR__ . "/inc/callbacks/register.php";
+require_once __DIR__ . "/inc/callbacks/boards.php";
+require_once __DIR__ . "/inc/callbacks/threads.php";
+require_once __DIR__ . "/inc/callbacks/posts.php";
 ?>
