@@ -6,14 +6,13 @@
             return new WP_Error('missing_fields', 'Не все важные поля были заполнены', ["status" => 400]);
         }
 
-        $content = sanitize_textarea_field($params['content']);
-        $author = isset($params['author']) && $params['author'] !== 'Anonymous' ? sanitize_text_field($params['author']) : 'Anonymous';
-        $createdAt = isset($params['createdAt']) ? sanitize_text_field($params['createdAt']) : 'N/A';
-        $parent = absint($params['parent']);
+        $content = $params['content'];
+        $author = isset($params['author']) && $params['author'] !== 'Anonymous' ? $params['author'] : 'Anonymous';
+        $parent = $params['parent'];
 
         $post_id = wp_insert_post([
             'post_type' => 'thread_post',
-            'post_title' => "$author - $createdAt",
+            'post_title' => "$author",
             'post_content' => $content,
             'post_status' => 'publish',
             'post_author' => get_current_user_id(),
@@ -27,11 +26,19 @@
             return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500]);
         }
 
+        $current_time = current_time("Y-m-d H:i:s");
+        $new_title = "$author ($post_id) {$current_time}";
+
+        wp_update_post([
+            'ID' => $post_id,
+            'post_title' => $new_title,
+        ]);
+
         $result = [
             "id" => $post_id,
             "content" => $content,
             "author" => $author,
-            "createdAt" => $createdAt,
+            "createdAt" => $current_time,
             "parent" => $parent,
         ];
 
@@ -39,5 +46,30 @@
             'success' => true,
             'post' => $result,
         ], 201);
+    }
+
+    function delete_current_post_api(WP_REST_Request $request) {
+        $id = $request->get_param();
+        if (!isset($id)) {
+            return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400]);
+        }
+
+        $post_deletion = wp_delete_post($id, true);
+        if(!$post_deletion) {
+            return new WP_Error(
+                'server_error',
+                'Ошибка на стороне сервера',
+                [
+                    "status" => 500,
+                    "success" => false,
+                    "details" => $post_deletion->get_error_message(),
+                ]
+            );
+        }
+
+        return new WP_REST_Response([
+            "success" => true,
+            "post_id" => $id,
+        ]);
     }
 ?>

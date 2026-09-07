@@ -8,7 +8,6 @@
 
     $username    = sanitize_user( $params['username'] );
     $password    = $params['password'];
-    $name        = !empty( $params['name'] ) ? sanitize_text_field( $params['name'] ) : $username;
     $description = !empty( $params['description'] ) ? sanitize_textarea_field( $params['description'] ) : '';
     $role = 'user';
 
@@ -23,8 +22,6 @@
     $user_id = wp_insert_user(array(
         'user_login' => $username,
         'user_pass' => $password,
-        'display_name' => $name,
-        'nickname' => $name,
         'description' => $description,
         'role' => $role,
     ));
@@ -36,7 +33,6 @@
     $response_data = array(
         'id' => $user_id,
         'username' => $username,
-        'name' => $name,
         'description' => $description,
         'role' => $role,
     );
@@ -45,5 +41,31 @@
         'success' => true,
         'user' => $response_data,
     ], 201);
+}
+
+function handle_user_login(WP_REST_Request) {
+    $params = $request->get_json_params();
+    
+    $username = $params['username'];
+    $password = $params['password'];
+
+    $this_user = get_user_by('user_login', $username);
+    if (!$this_user) {
+        return new WP_Error('user_not_found', 'Пользователь с таким именем не был найден', ["status" => 404, "success" => false]);
+    }
+
+    if($this_user->user_pass !== $password) {
+        return new WP_Error('incorrect_password', 'Вы ввели неправильный пароль от этого аккаунта', ["status" => 401, "success" => false]);
+    }
+
+    return new WP_REST_Response([
+        'success' => true,
+        'user' => [
+            'id' => $this_user->ID,
+            'username' => $this_user->user_login,
+            'description' => $this_user->description,
+            'role' => $this_user->role,
+        ],
+    ]);
 }
 ?>

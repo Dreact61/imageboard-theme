@@ -138,7 +138,7 @@
             return new WP_REST_Response([
                 "success" => true,
                 "board" => null,
-            ]);
+            ], 204);
         }
 
         $new_data = [

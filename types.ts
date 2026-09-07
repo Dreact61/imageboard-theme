@@ -1,7 +1,6 @@
 export type User = {
     id?: number,
     username: string,
-    name?: string,
     description?: string,
     role: 'user' | 'admin',
     password?: string
