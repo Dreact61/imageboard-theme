@@ -27,13 +27,67 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/users/(?P<username>[a-zA-Z0-9]+)/edit", [
+        register_rest_route('myapi/v1', "/users/(?P<id>\d+)/edit", [
             'methods' => WP_REST_Server::EDITABLE,
             'callback' => 'handle_user_edit',
-            'permission_callback' => function() {
-                $id = get_current_user_id();
-                //--------HERE
-            }
+            'permission_callback' => function(WP_REST_Request $req) {
+                $user_id = get_current_user_id();
+                if($user_id === 0) {
+                    return false;
+                }
+
+                $target_id = absint($req->get_param('id'));
+                return $user_id === (int) $target_id;
+            },
+            'args' => [
+                'username' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field'
+                ],
+               'description' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_textarea_field'
+                ],
+                'password' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field'
+                ],
+                'id' => [
+                    'type' => 'integer',
+                    'required' => true,
+                    'sanitize_callback' => 'absint'
+                ]
+            ]
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/users/(?P<id>\d+)/delete', [
+            'methods' => WP_REST_Server::DELETABLE,
+            'callback' => 'handle_user_deletion',
+            'permission_callback' => function(WP_REST_Request $req) {
+                $user_id = get_current_user_id();
+
+                if ($user_id === 0) {
+                    return false;
+                }
+                if (current_user_can('delete_users')) {
+                    return true;
+                }
+                
+                $target_id = absint($req->get_param('id'));
+                return $user_id === (int)$target_id;
+            },
+            'args' => [
+                'id' => [
+                    'type' => 'integer',
+                    'required' => true,
+                    'sanitize_callback' => 'absint'
+                ]
+            ]
         ]);
     });
 
@@ -286,5 +340,4 @@
             ]
         ]);
     });
-
 ?>

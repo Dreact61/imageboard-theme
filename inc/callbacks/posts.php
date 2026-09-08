@@ -49,7 +49,7 @@
     }
 
     function delete_current_post_api(WP_REST_Request $request) {
-        $id = $request->get_param();
+        $id = $request->get_param('id');
         if (!isset($id)) {
             return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400]);
         }
@@ -61,8 +61,7 @@
                 'Ошибка на стороне сервера',
                 [
                     "status" => 500,
-                    "success" => false,
-                    "details" => $post_deletion->get_error_message(),
+                    "success" => false
                 ]
             );
         }

@@ -28,10 +28,12 @@ add_action('wp_enqueue_scripts', function() {
     }
 });
 
+require_once __DIR__ . "/inc/roles.php";
 require_once __DIR__ . "/inc/meta.php";
 require_once __DIR__ . "/inc/routes.php";
 require_once __DIR__ . "/inc/callbacks/register.php";
 require_once __DIR__ . "/inc/callbacks/boards.php";
 require_once __DIR__ . "/inc/callbacks/threads.php";
 require_once __DIR__ . "/inc/callbacks/posts.php";
+require_once __DIR__ . "/inc/widgets.php";
 ?>
