@@ -1,5 +1,36 @@
 <?php
     add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/register', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => 'handle_user_register',
+            'permission_callback' => '__return_true',
+            'args' => [
+                'username' => [
+                    'type' => 'string',
+                    'required' => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
+                ],
+                'password' => [
+                    'type' => 'string',
+                    'required' => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
+                ],
+                'description' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_textarea_field'
+                ],
+            ]
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', '/login', array(
             'methods' => 'POST',
             'callback' => 'handle_user_login',

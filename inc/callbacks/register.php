@@ -80,9 +80,9 @@ function handle_user_edit(WP_REST_Request $request) {
     $current_desc = $current_user->description;
     $current_pass = $current_user->user_pass;
 
-    $new_username = $params['username'];
-    $new_desc = $params['description'];
-    $new_pass = $params['password'];
+    $new_username = $params['username'] ?? $current_username;
+    $new_desc = $params['description'] ?? $current_desc;
+    $new_pass = $params['password'] ?? $current_pass;
 
     $userdata = [
         'ID' => $params['id']
@@ -130,8 +130,7 @@ function handle_user_edit(WP_REST_Request $request) {
         "user" => [
             'id' => $params['id'],
             'name' => $new_username ?? '',
-            'description' => $new_desc ?? '',
-            'password' => $new_pass ?? ''
+            'description' => $new_desc ?? ''
         ]
     ], 200);
 }

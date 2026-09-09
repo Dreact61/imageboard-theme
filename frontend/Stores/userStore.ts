@@ -1,0 +1,210 @@
+import { create } from "zustand";
+import axios from "axios";
+import type { User, Store_Users } from "../../types";
+
+import dotenv from 'dotenv'
+const CUSTOM_API = process.env.CUSTOM_API
+
+const getHeaders = () => {
+    const nonce = (window as any)?.wpApiSettings.nonce || ''
+    return {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': nonce
+        }
+    }
+}
+
+const storeUsers = create<Store_Users>((set, get) => ({
+    error: null,
+    loading: false,
+    log: null,
+    currentUser: null,
+
+    register: async (data) => {
+        try {
+            set({loading: true, error: null, log: null})
+            let result_log = {
+                success: false,
+                msg: '',
+                status: 0,
+                data: {}
+            }
+
+            const res = await axios.post(`${CUSTOM_API}/register`, data)
+            if(!res.data.success) {
+                throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+            }
+
+            const user = res.data.user
+
+            result_log = {
+                success: res.data?.success,
+                msg: 'Пользователь создан успешно!',
+                status: res.status || 201,
+                data: {
+                    id: user.id,
+                    username: user.username,
+                    description: user.description,
+                    role: user.role
+                }
+            }
+
+            set({log: result_log})
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            set({
+                error: errorMsg,
+                log: {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                    data: {}
+                }
+            })
+        } finally {
+            set({loading:false})
+        }
+    },
+
+    login: async (username, password) => {
+        try {
+            set({loading: true, error: null, log: null})
+            let result_log = {
+                success: false,
+                msg: '',
+                status: 0,
+                data: {}
+            }
+
+            const data = {username, password}
+            const res = await axios.post(`${CUSTOM_API}/login`, data)
+            if (!res.data?.success) {
+                throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+            }
+
+            const user = res.data.user
+            const currentUser = {
+                id: user.id,
+                username: user.username,
+                description: user.description,
+                role: user.role
+            }
+
+            result_log = {
+                success: true,
+                msg: `Вы успешно вошли в аккаунт ${user.username}`,
+                status: res.status || 200,
+                data: currentUser
+            }
+            set({log: result_log, currentUser: currentUser})
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            set({
+                error: errorMsg,
+                log: {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                    data: {}
+                }
+            })
+        } finally {
+            set({loading:false})
+        }
+    },
+
+    editUser: async (data) => {
+        try {
+            set({loading: true, error: null, log: null})
+            let result_log = {
+                success: false,
+                msg: '',
+                status: 0,
+                data: {}
+            }
+
+            const res = await axios.put(`${CUSTOM_API}/users/${data.id}/edit`, getHeaders())
+            if (!res.data.success) {
+                throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+            }
+
+            const user = res.data.user
+            const editedUser = {
+                id: user.id,
+                username: user.username,
+                description: user.description,
+                role: user.role
+            }
+
+            result_log = {
+                success: res.data?.success,
+                msg: 'Пользователь был изменен успешно!',
+                status: res.status || 200,
+                data: editedUser
+            }
+
+            const {currentUser} = get()
+            if (currentUser?.id === user.id) {
+                set({currentUser: editedUser})
+            }
+            set({log: result_log})
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            set({
+                error: errorMsg,
+                log: {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                    data: {}
+                }
+            })
+        } finally {
+            set({loading:false})
+        }
+    },
+
+    deleteUser: async (id) => {
+        try {
+            set({loading: true, error: null, log: null})
+            let result_log = {
+                success: false,
+                msg: '',
+                status: 0,
+                data: {}
+            }
+
+            const res = await axios.delete(`${CUSTOM_API}/users/${id}/delete`, getHeaders())
+            if (!res.data?.success) {
+                throw new Error(res.data?.message || res.data?.code || 'error_unknown')
+            }
+
+            result_log = {
+                success: res.data?.success,
+                msg: 'Пользователь был успешно удален',
+                status: res.status || 200,
+                data: res.data.id
+            }
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            set({
+                error: errorMsg,
+                log: {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                    data: {}
+                }
+            })
+        } finally {
+            set({loading:false})
+        }
+    },
+}))
+
+export default storeUsers
