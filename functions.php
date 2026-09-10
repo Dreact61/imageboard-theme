@@ -36,4 +36,8 @@ require_once __DIR__ . "/inc/callbacks/boards.php";
 require_once __DIR__ . "/inc/callbacks/threads.php";
 require_once __DIR__ . "/inc/callbacks/posts.php";
 require_once __DIR__ . "/inc/widgets.php";
+
+require_once __DIR__ . "/vendor/autoload.php";
+require_once __DIR__ . "/inc/jwt-helper.php";
+require_once __DIR__ . "/inc/middlewares.php";
 ?>

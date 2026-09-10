@@ -213,6 +213,9 @@ importers:
       axios:
         specifier: ^1.20.0
         version: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+      php-jwt:
+        specifier: git+https://github.com/firebase/php-jwt.git
+        version: git+https://github.com/firebase/php-jwt.git#93d248c650aea615d74a5ffa20c91c7a818e9b8d
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -1734,6 +1737,10 @@ packages:
 
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
+
+  php-jwt@git+https://github.com/firebase/php-jwt.git#93d248c650aea615d74a5ffa20c91c7a818e9b8d:
+    resolution: {commit: 93d248c650aea615d74a5ffa20c91c7a818e9b8d, repo: https://github.com/firebase/php-jwt.git, type: git}
+    version: 0.0.0
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -3326,6 +3333,8 @@ snapshots:
   path-key@3.1.1: {}
 
   path-parse@1.0.7: {}
+
+  php-jwt@git+https://github.com/firebase/php-jwt.git#93d248c650aea615d74a5ffa20c91c7a818e9b8d: {}
 
   picocolors@1.1.1: {}
 

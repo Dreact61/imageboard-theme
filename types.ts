@@ -11,6 +11,8 @@ export type Store_Users = {
     loading: boolean,
     log: Log | null,
     currentUser: User | null,
+    refreshToken: string | null,
+    accessToken: string | null,
     register: (data:User) => Promise<void>,
     login: (username: string, password: string) => Promise<void>,
     editUser: (data:User) => Promise<void>,

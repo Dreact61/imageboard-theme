@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import type { User, Store_Users } from "../../types";
+import type { Store_Users, User } from "../../types";
 
 import dotenv from 'dotenv'
 const CUSTOM_API = process.env.CUSTOM_API
@@ -20,6 +20,8 @@ const storeUsers = create<Store_Users>((set, get) => ({
     loading: false,
     log: null,
     currentUser: null,
+    refreshToken: null,
+    accessToken: null,
 
     register: async (data) => {
         try {
@@ -125,18 +127,24 @@ const storeUsers = create<Store_Users>((set, get) => ({
                 status: 0,
                 data: {}
             }
-
-            const res = await axios.put(`${CUSTOM_API}/users/${data.id}/edit`, getHeaders())
+            
+            const editData = {
+                id: data.id,
+                username: data.username || null,
+                description: data.description || null,
+                password: data.password || null
+            }
+            const res = await axios.put(`${CUSTOM_API}/users/${data.id}/edit`, editData, getHeaders())
             if (!res.data.success) {
                 throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             }
 
-            const user = res.data.user
+            const user:User = res.data.user
             const editedUser = {
-                id: user.id,
+                id: data.id,
                 username: user.username,
                 description: user.description,
-                role: user.role
+                password: user.password
             }
 
             result_log = {
@@ -189,6 +197,7 @@ const storeUsers = create<Store_Users>((set, get) => ({
                 status: res.status || 200,
                 data: res.data.id
             }
+            set({log: result_log})
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
