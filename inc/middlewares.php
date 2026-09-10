@@ -18,4 +18,54 @@ function mw_is_authenticated(WP_REST_Request $req) {
     wp_set_current_user((int)$token_data['uid']);
     return true;
 }
+
+function mw_is_admin(WP_REST_Request $req) {
+    $is_auth = mw_is_authenticated($req);
+    if (is_wp_error($is_auth)) {
+        return $is_auth;
+    }
+
+    $has_admin_rights = current_user_can('manage_options');
+    if(!$has_admin_rights) {
+        return new WP_Error('not_admin', 'Недостаточно прав', ["status" => 403]);
+    }
+
+    return true;
+}
+
+function mw_is_board_owner(WP_REST_Request $req) {
+    $is_auth = mw_is_authenticated($req);
+    if (is_wp_error($is_auth)) {
+        return $is_auth;
+    }
+
+    $board_author = get_post_meta(absint($req->get_param('id')), 'board_author', true);
+    $username = get_post(get_current_user_id(), 'user_login');
+
+    return $username === $board_author;
+}
+
+function mw_is_thread_owner(WP_REST_Request $req) {
+    $is_auth = mw_is_authenticated($req);
+    if (is_wp_error($is_auth)) {
+        return $is_auth;
+    }
+
+    $thread_author = get_post_meta(absint($req->get_param('id')), 'thread_author', true);
+    $username = get_post(get_current_user_id(), 'user_login');
+
+    return $username === $thread_author;
+}
+
+function mw_is_post_author(WP_REST_Request $req) {
+    $is_auth = mw_is_authenticated($req);
+    if (is_wp_error($is_auth)) {
+        return $is_auth;
+    }
+
+    $username = get_post(get_current_user_id(), 'user_login');
+    $post_author = get_post_meta(absint($req->get_param('id')), 'post_author', true);
+
+    return $username === $post_author;
+}
 ?>

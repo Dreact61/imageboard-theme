@@ -62,11 +62,12 @@
             'methods' => WP_REST_Server::EDITABLE,
             'callback' => 'handle_user_edit',
             'permission_callback' => function(WP_REST_Request $req) {
-                $user_id = get_current_user_id();
-                if($user_id === 0) {
-                    return false;
+                $is_auth = mw_is_authenticated($req);
+                if(!$is_auth) {
+                    return $is_auth;
                 }
 
+                $user_id = get_current_user_id();
                 $target_id = absint($req->get_param('id'));
                 return $user_id === (int) $target_id;
             },
@@ -100,15 +101,17 @@
             'methods' => WP_REST_Server::DELETABLE,
             'callback' => 'handle_user_deletion',
             'permission_callback' => function(WP_REST_Request $req) {
-                $user_id = get_current_user_id();
-
-                if ($user_id === 0) {
-                    return false;
-                }
-                if (current_user_can('delete_users')) {
+                $is_admin = mw_is_admin($req);
+                if ($is_admin) {
                     return true;
                 }
                 
+                $is_auth = mw_is_authenticated($req);
+                if (is_wp_error($is_auth)) {
+                    return $is_auth;
+                }
+
+                $user_id = get_current_user_id();
                 $target_id = absint($req->get_param('id'));
                 return $user_id === (int)$target_id;
             },
@@ -130,9 +133,7 @@
         register_rest_route('myapi/v1', "/boards/(?P<mark>[a-zA-Z0-9]+)", [
             'methods' => WP_REST_Server::READABLE,
             'callback' => 'fetch_current_board_api',
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
-            },
+            'permission_callback' => '__return_true',
             'args' => [
                 'mark' => [
                     'type' => 'string',
@@ -147,9 +148,7 @@
         register_rest_route('myapi/v1', '/boards/create', [
             'methods' => 'POST',
             'callback' => 'register_boards_api',
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
-            },
+            'permission_callback' => 'mw_is_authenticated',
             'args' => [
                 'name' => [
                     'type' => 'string',
@@ -179,9 +178,7 @@
         register_rest_route('myapi/v1', "/boards/(?P<mark>[a-zA-Z0-9]+)/edit", [
             'methods' => 'PUT',
             'callback' => 'edit_current_board_api',
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
-            },
+            'permission_callback' => 'mw_is_board_owner',
             'args' => [
                 'name' => [
                     'type' => 'string',
@@ -211,9 +208,24 @@
         register_rest_route('myapi/v1', '/boards/(?P<mark>[a-zA-Z0-9]+)/delete', [
             'methods' => 'DELETE',
             'callback' => 'delete_current_board_api',
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
-            }
+            'permission_callback' => function(WP_REST_Request $req) {
+                $is_admin = mw_is_admin($req);
+                if ($is_admin) {
+                    return true;
+                }
+
+                return mw_is_board_owner($req);
+            },
+            'args' => [
+                'id' => [
+                    'type' => 'integer',
+                    'required' => true,
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
+                ]
+            ]
         ]);
     });
 
@@ -240,7 +252,7 @@
         register_rest_route('myapi/v1', '/threads/create', [
             'methods' => 'POST',
             'callback' => 'imageboard_create_thread',
-            'permission_callback' => '__return_true',
+            'permission_callback' => 'mw_is_authenticated',
             'args' => [
                 'name' => [
                     'type' => 'string',
@@ -275,9 +287,7 @@
         register_rest_route('myapi/v1', "/threads/(?P<id>\d+)/edit", [
             'methods' => 'PUT',
             'callback' => 'edit_current_thread_api',
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
-            },
+            'permission_callback' => 'mw_is_thread_owner',
             'args' => [
                 'name' => [
                     'type' => 'string',
@@ -308,8 +318,18 @@
         register_rest_route('myapi/v1', "/threads/(?P<id>\d+)/delete", [
             'methods' => 'DELETE',
             'callback' => 'delete_current_thread_api',
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
+            'permission_callback' => function(WP_REST_Request $req) {
+                $is_admin = mw_is_admin($req);
+                if ($is_admin) {
+                    return true;
+                }
+
+                $is_board_owner = mw_is_board_owner($req);
+                if ($is_board_owner) {
+                    return true;
+                }
+                
+                return mw_is_thread_owner($req);
             },
             'args' => [
                 'id' => [
@@ -329,9 +349,7 @@
         register_rest_route('myapi/v1', '/posts/create', [
             'methods' => 'POST',
             'callback' => 'imageboard_create_post',
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
-            },
+            'permission_callback' => '__return_true',
             'args' => [
                 'content' => [
                     'type' => 'string',
@@ -359,8 +377,18 @@
         register_rest_route('myapi/v1', "/posts/post-(?P<id>\d+)/delete", [
             'methods' => 'DELETE',
             'callback' => 'delete_current_post_api',
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
+            'permission_callback' => function(WP_REST_Request $req) {
+                $is_admin = mw_is_admin($req);
+                if ($is_admin) {
+                    return true;
+                }
+
+                $is_thread_owner = mw_is_thread_owner($req);
+                if ($is_thread_owner) {
+                    return true;
+                }
+
+                return mw_is_post_author($req);
             },
             'args' => [
                 'id' => [

@@ -5,15 +5,14 @@ import type {Board, Store_Boards, Thread} from "../../types";
 import dotenv from 'dotenv'
 const CUSTOM_API = process.env.CUSTOM_API
 
-const getHeaders = () => {
-    const nonce = (window as any)?.wpApiSettings.nonce || ''
+const getAxiosConfig = () => {
     return {
+        withCredentials: true,
         headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': nonce
+            'Content-Type': 'application/json'
         }
     }
-}
+} 
 
 axios.defaults.withCredentials = true
 
@@ -34,7 +33,7 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 data: {}
             }
 
-            const res = await axios.get(`${CUSTOM_API}/boards/${mark}`, getHeaders())
+            const res = await axios.get(`${CUSTOM_API}/boards/${mark}`, getAxiosConfig())
             if (!res.data?.success) {
                 throw new Error(res.data?.message || "Не удалось загрузить доску")
             }
@@ -99,7 +98,7 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 createdAt: new Date().toISOString()
             }
 
-            const res = await axios.post(`${CUSTOM_API}/boards/create`, newBoard, getHeaders())
+            const res = await axios.post(`${CUSTOM_API}/boards/create`, newBoard, getAxiosConfig())
             if (!res.data?.success) {
                 throw new Error(res.data?.message || 'Не удалось создать доску')
             }
