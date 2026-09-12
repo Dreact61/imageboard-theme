@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import type {Board, Store_Boards, Thread} from "../../types";
+import type {Thread, Store_Threads, Post} from '../../types'
 
 const CUSTOM_API = process.env.CUSTOM_API
 
@@ -13,16 +13,16 @@ const getAxiosConfig = () => {
     }
 }
 
-const storeBoards = create<Store_Boards>((set, get) => ({
+const storeThreads = create<Store_Threads>((set, get) => ({
     error: null,
     loading: false,
     log: null,
-    currentBoard: null,
-    currentBoardThreads: [],
+    currentThread: null,
+    currentThreadPosts: [],
 
-    fetchThisBoard: async (id) => {
+    fetchThisThread: async (id) => {
         try {
-            set({loading: true, error: null, log: null})
+            set({error: null, loading: true, log: null})
             let result_log = {
                 success: false,
                 msg: '',
@@ -30,33 +30,24 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 data: {}
             }
 
-            const res = await axios.get(`${CUSTOM_API}/boards/${id}`)
+            const res = await axios.get(`${CUSTOM_API}/threads/${id}`)
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-
-            const board:Board = res.data.board
-            const threads:Thread[] = res.data.threads
-            if (board.createdAt instanceof Date) board.createdAt = board.createdAt.toISOString()
-
-            const currentBoard = {
-                id: id,
-                name: board.name,
-                description: board.description || '',
-                mark: board.mark,
-                author: board.author || 'Anonymous',
-                createdAt: board.createdAt || 'N/A'
-            }
             
+            const thread:Thread = res.data.thread
+            const posts = res.data.posts
+            if (thread.createdAt instanceof Date) thread.createdAt = thread.createdAt.toISOString()
+
             result_log = {
                 success: res.data.success,
-                msg: 'Доска успешно загружена!',
+                msg: 'Тред успешно загружен',
                 status: res.status,
-                data: board
+                data: thread
             }
 
             set({
-                log: result_log,
-                currentBoard: currentBoard,
-                currentBoardThreads: threads
+                currentThread: thread,
+                currentThreadPosts: posts,
+                log: result_log
             })
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
@@ -71,13 +62,13 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 }
             })
         } finally {
-            set({loading: false})
+            set({loading:false})
         }
     },
 
-    createNewBoard: async (data) => {
+    createNewThread: async (data) => {
         try {
-            set({loading: true, error: null, log: null})
+            set({error: null, loading: true, log: null})
             let result_log = {
                 success: false,
                 msg: '',
@@ -85,27 +76,39 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 data: {}
             }
 
-            const newBoard = {
+            const newThread:Thread = {
                 name: data.name,
+                parent: data.parent,
                 description: data.description,
-                mark: data.mark,
+                status: data.status || 'PUBLIC',
                 author: data.author
             }
 
-            const res = await axios.post(`${CUSTOM_API}/boards/create`, newBoard, getAxiosConfig())
-            if (!res.data?.success) {
-                throw new Error(res.data?.message || 'Не удалось создать доску')
+            const res = await axios.post(`${CUSTOM_API}/threads/create`, newThread, getAxiosConfig())
+            if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+            
+            const thread:Thread = res.data.thread
+
+            const createdThread:Thread = {
+                id: thread.id,
+                name: thread.name,
+                description: thread.description,
+                parent: thread.parent,
+                author: thread.author,
+                createdAt: thread.createdAt,
+                status: thread.status
             }
 
-            result_log.status = res.status,
-            result_log.msg = "Доска создана успешно"
-            result_log.success = res.data?.success
-            result_log.data = newBoard
+            result_log = {
+                success: res.data.success,
+                msg: 'Тред успешно создан!',
+                status: res.status,
+                data: createdThread
+            }
 
             set({
                 log: result_log
             })
-
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
@@ -119,13 +122,13 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 }
             })
         } finally {
-            set({loading: false})
+            set({loading:false})
         }
     },
 
-    editBoard: async (id, data) => {
+    editThread: async (id, data) => {
         try {
-            set({loading: true, error: null, log: null})
+            set({error: null, loading: true, log: null})
             let result_log = {
                 success: false,
                 msg: '',
@@ -133,80 +136,37 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 data: {}
             }
 
-            const dataToEdit:Board = {
+            const dataToEdit = {
                 id: id,
-                name: data.name,
-                mark: data.mark,
-                description: data.description
+                name: data.name || null,
+                description: data.description || null,
+                status: data.status || null
             }
 
-            const res = await axios.put(`${CUSTOM_API}/boards/${id}`, dataToEdit, getAxiosConfig())
-            if (!res.data?.success) {
-                throw new Error(res.data?.message || 'Не удалось изменить доску')
-            }
+            const res = await axios.put(`${CUSTOM_API}/threads/`, dataToEdit, getAxiosConfig())
+            if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+            
+            const thread:Thread = res.data.thread
 
-            const board = res.data.board
-            const editedBoard = {
-                id: board.id,
-                name: board.name,
-                description: board.description,
-                mark: board.mark,
-                author: board.author,
-                createdAt: board.createdAt
-            }
-
-            result_log = {
-                success: true,
-                msg: 'Доска успешно обновлена!',
-                status: 200,
-                data: editedBoard
-            }
-
-            const {currentBoard} = get()
-            if (currentBoard && currentBoard.id === board.id) {
-                set({currentBoard: board})
-            }
-            set({log: result_log})
-        } catch(err:any) {
-            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
-            console.error(errorMsg)
-            set({
-                error: errorMsg,
-                log: {
-                    success: false,
-                    msg: errorMsg,
-                    status: err.response?.status || 500,
-                    data: {}
-                }
-            })
-        } finally {
-            set({loading: false})
-        }
-    },
-    
-    deleteBoard: async (mark) => {
-        try {
-            set({loading: true, error: null, log: null})
-            let result_log = {
-                success: false,
-                msg: '',
-                status: 0,
-                data: 0
-            }
-
-            const res = await axios.delete(`${CUSTOM_API}/boards/${mark}/delete`, getAxiosConfig())
-            if (!res.data?.success) {
-                throw new Error(res.data?.message || 'Не удалось удалить доску')
+            const editedThread = {
+                id: thread.id,
+                name: thread.name,
+                description: thread.description,
+                parent: thread.parent,
+                author: thread.author,
+                createdAt: thread.createdAt,
+                status: thread.status
             }
 
             result_log = {
                 success: res.data.success,
-                msg: 'Доска успешно удалена',
+                msg: 'Тред успешно обновлен',
                 status: res.status,
-                data: res.data.id
+                data: editedThread
             }
-            const {currentBoard} = get()
-            if (currentBoard && currentBoard.id === res.data.id) set({currentBoard: null, currentBoardThreads: []})
+
+            const {currentThread} = get()
+            if(currentThread && currentThread.id === editedThread.id) set({currentThread: editedThread})
             set({log: result_log})
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
@@ -221,9 +181,47 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 }
             })
         } finally {
-            set({loading: false})
+            set({loading:false})
+        }
+    },
+
+    deleteThread: async (id) => {
+        try {
+            set({error: null, loading: true, log: null})
+            let result_log = {
+                success: false,
+                msg: '',
+                status: 0,
+                data: {}
+            }
+
+            const res = await axios.delete(`${CUSTOM_API}/threads/${id}`, getAxiosConfig())
+            if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+            
+            const thread = res.data.thread_id
+
+            result_log = {
+                success: res.data.success,
+                msg: 'Тред успешно удален',
+                status: res.status,
+                data: id
+            }
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            set({
+                error: errorMsg,
+                log: {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                    data: {}
+                }
+            })
+        } finally {
+            set({loading:false})
         }
     }
 }))
 
-export default storeBoards
+export default storeThreads

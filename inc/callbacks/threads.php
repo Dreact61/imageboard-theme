@@ -7,7 +7,7 @@
         }
 
         $board_mark = $params['parent'];
-        $author = empty($params['author']) ? 'Anonymous' : $params['author'];
+        $author = $params['author'];
 
         $board_posts = get_posts([
             'post_type' => 'board',
@@ -30,7 +30,7 @@
             'post_title' => $name,
             'post_content' => '',
             'post_status' => 'publish',
-            'post_author' => $author === 'Anonymous' ? 0 : get_current_user_id(),
+            'post_author' => get_current_user_id(),
             'meta_input' => [
                 'board_mark' => $board_mark,
                 'thread_description' => $description,
@@ -60,17 +60,15 @@
     }
 
     function fetch_current_thread_api(WP_REST_Request $request) {
-        $mark = $request->get_param('mark');
-        if (empty($mark)) {
+        $id = $request->get_param('id');
+        if (!$id) {
             return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400, "success" => true]);
         }
 
         $post = get_posts([
-            'posts_per_page' => 1,
+            'include' => $id,
             'post_type' => 'thread',
             'post_status' => 'publish',
-            'meta_key' => 'board_mark',
-            'meta_value' => $mark
         ]);
         if (is_wp_error($post)) {
             return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500]);
@@ -83,7 +81,7 @@
             'description' => get_post_meta($thread->ID, 'thread_description', true),
             'parent' => get_post_meta($thread->ID, 'board_mark', true),
             'author' => get_post_meta($thread->ID, 'thread_author', true),
-            'createdAt' => get_the_date('Y-m-n H:i:s', $thread->ID),
+            'createdAt' => $thread->post_date,
             'status' => get_post_meta($thread->ID, 'thread_status', true)
         ];
 

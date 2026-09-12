@@ -130,15 +130,18 @@
     //=========================
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/boards/(?P<mark>[a-zA-Z0-9]+)", [
+        register_rest_route('myapi/v1', "/boards/(?P<id>\d+)", [
             'methods' => WP_REST_Server::READABLE,
             'callback' => 'fetch_current_board_api',
             'permission_callback' => '__return_true',
             'args' => [
-                'mark' => [
-                    'type' => 'string',
+                'id' => [
+                    'type' => 'integer',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
                 ],
             ],
         ]);
@@ -198,14 +201,17 @@
                 'id' => [
                     'type' => 'integer',
                     'required' => true,
-                    'sanitize_callback' => 'absint'
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
                 ]
             ]
         ]);
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', '/boards/(?P<mark>[a-zA-Z0-9]+)/delete', [
+        register_rest_route('myapi/v1', '/boards/(?P<id>\d+)/delete', [
             'methods' => 'DELETE',
             'callback' => 'delete_current_board_api',
             'permission_callback' => function(WP_REST_Request $req) {
@@ -234,15 +240,18 @@
     //=========================
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/threads/(?P<id>\d+)", [
+        register_rest_route('myapi/v1', "/threads/(?P<parent>[a-zA-Z0-9]\d+)/(?P<id>\d+)", [
             'methods' => WP_REST_Server::READABLE,
             'callback' => 'fetch_current_thread_api',
             'permission_callback' => '__return_true',
             'args' => [
-                'mark' => [
+                'id' => [
                     'type' => 'string',
                     'required' => true,
-                    'sanitize_callback' => 'sanitize_text_field'
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
                 ]
             ]
         ]);
@@ -271,7 +280,7 @@
                 ],
                 'author' => [
                     'type' => 'string',
-                    'required' => false,
+                    'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
                 ],
                 'status' => [
@@ -308,7 +317,10 @@
                 'id' => [
                     'type' => 'integer',
                     'required' => true,
-                    'sanitize_callback' => 'absint'
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
                 ]
             ]
         ]);
@@ -336,6 +348,9 @@
                     'type' => 'integer',
                     'required' => true,
                     'sanitize_callback' => 'absint',
+                    'validate_callback' => function ($param) {
+                        return is_numeric($param);
+                    }
                 ]
             ]
         ]);

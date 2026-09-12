@@ -2,18 +2,16 @@ import { create } from "zustand";
 import axios from "axios";
 import type { Store_Users, User } from "../../types";
 
-import dotenv from 'dotenv'
 const CUSTOM_API = process.env.CUSTOM_API
 
-const getHeaders = () => {
-    const nonce = (window as any)?.wpApiSettings.nonce || ''
+const getAxiosConfig = () => {
     return {
+        withCredentials: true,
         headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': nonce
+            'Content-Type': 'application/json'
         }
     }
-}
+} 
 
 const storeUsers = create<Store_Users>((set, get) => ({
     error: null,
@@ -34,9 +32,7 @@ const storeUsers = create<Store_Users>((set, get) => ({
             }
 
             const res = await axios.post(`${CUSTOM_API}/register`, data)
-            if(!res.data.success) {
-                throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-            }
+            if(!res.data.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
 
             const user = res.data.user
 
@@ -118,6 +114,8 @@ const storeUsers = create<Store_Users>((set, get) => ({
         }
     },
 
+    logout: async () => set({currentUser: null}),
+
     editUser: async (data) => {
         try {
             set({loading: true, error: null, log: null})
@@ -134,17 +132,16 @@ const storeUsers = create<Store_Users>((set, get) => ({
                 description: data.description || null,
                 password: data.password || null
             }
-            const res = await axios.put(`${CUSTOM_API}/users/${data.id}/edit`, editData, getHeaders())
-            if (!res.data.success) {
-                throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-            }
-
+            const res = await axios.put(`${CUSTOM_API}/users/${data.id}/edit`, editData, getAxiosConfig())
+            if (!res.data.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+        
             const user:User = res.data.user
             const editedUser = {
                 id: data.id,
                 username: user.username,
                 description: user.description,
-                password: user.password
+                role: user.role,
+                password: editData?.password ? user.password : null
             }
 
             result_log = {
@@ -186,10 +183,8 @@ const storeUsers = create<Store_Users>((set, get) => ({
                 data: {}
             }
 
-            const res = await axios.delete(`${CUSTOM_API}/users/${id}/delete`, getHeaders())
-            if (!res.data?.success) {
-                throw new Error(res.data?.message || res.data?.code || 'error_unknown')
-            }
+            const res = await axios.delete(`${CUSTOM_API}/users/${id}/delete`, getAxiosConfig())
+            if (!res.data?.success) throw new Error(res.data?.message || res.data?.code || 'error_unknown')
 
             result_log = {
                 success: res.data?.success,

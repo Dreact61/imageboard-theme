@@ -1,7 +1,11 @@
 const path = require('path');
+const { DotenvPlugin } = require('webpack');
 
 module.exports = {
   entry: './root.jsx',
+  plugins: [
+    new DotenvPlugin()
+  ],
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'index.js', 

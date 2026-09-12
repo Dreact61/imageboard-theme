@@ -6,6 +6,28 @@
 
 #### эндпоинты:
 
+> Основной адрес - **`http://localhost:8080/wp-json/myapi/v1`**
+
+1. Пользователи (Users)
+ - `/register`
+ - `/login`
+ - `/users/(user_id)`
+   1. `/edit`
+   2. `/delete`
+2. Доски (Boards)
+ - `/boards/(board_mark)`
+   1. `/edit`
+   2. `/delete`
+ - `/boards/create`
+3. Треды (Threads)
+ - `/threads/(thread_id)`
+   1. `/edit`
+   2. `/delete`
+ - `threads/create`
+4. Посты (Posts)
+ - `posts/create`
+ - `posts/(post_id)/delete`
+
 ---
 
 #### группировки требований эндпоинтов:
@@ -35,3 +57,4 @@
  - `rest_forbidden` ("Вы не авторизованы") - код 401;
  - `invalid_token` ("Токен сломан или просрочен") - код 401;
  - `not_admin` ("Недостаточно прав") - код 403;
+ - `error_unknown` ("Неизвестная ошибка") - код 500;
