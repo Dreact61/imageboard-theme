@@ -2,12 +2,11 @@
     function imageboard_create_thread(WP_REST_Request $request) {
         $params = $request->get_json_params();
 
-        if (empty($params['name']) || empty($params['parent'])) {
-            return new WP_Error('missing_fields', "Не все важные поля были заполнены", ["status" => 400]);
-        }
-
         $board_mark = $params['parent'];
         $author = $params['author'];
+        $name = $params['name'];
+        $description = $params['description'] ?? '';
+        $status = strtoupper($params['status']) ?? 'PUBLIC';
 
         $board_posts = get_posts([
             'post_type' => 'board',
@@ -17,13 +16,9 @@
             'post_status' => 'publish'
         ]);
 
-        if (empty($board_posts)) {
+        if (!$board_posts) {
             return new WP_Error('board_not_found', 'Доска не была найдена', ["status" => 400]);
         }
-
-        $name = $params['name'];
-        $description = empty($params['description']) ? '' : $params['description'];
-        $status = empty($params['status']) ? 'PUBLIC' : strtoupper($params['status']);
 
         $post = wp_insert_post([
             'post_type' => 'thread',
@@ -61,9 +56,6 @@
 
     function fetch_current_thread_api(WP_REST_Request $request) {
         $id = $request->get_param('id');
-        if (!$id) {
-            return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400, "success" => true]);
-        }
 
         $post = get_posts([
             'include' => $id,
@@ -112,9 +104,6 @@
 
     function edit_current_thread_api(WP_REST_Request $request) {
         $params = $request->get_json_params();
-        if (empty($params) || empty($params['id'])) {
-            return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400]);
-        }
         
         $id = $params['id'];
 
@@ -134,9 +123,9 @@
         $current_desc = get_post_meta($thread->ID, 'thread_description', true);
         $current_status = get_post_meta($thread->ID, 'thread_status', true);
 
-        $new_name = trim($params['name']);
-        $new_desc = trim($params['description']);
-        $new_status = strtoupper($params['status']);
+        $new_name = trim($params['name']) ?? $current_name;
+        $new_desc = trim($params['description']) ?? $current_desc;
+        $new_status = strtoupper($params['status']) ?? $current_status;
 
         if ($current_desc === $new_desc && $current_name === $new_name && $current_status === $new_status) {
             return new WP_REST_Response([
@@ -185,9 +174,6 @@
 
     function delete_current_thread_api(WP_REST_Request $request) {
         $id = $request->get_param('id');
-        if(empty($id)) {
-            return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400]);
-        }
 
         $relative_posts = get_posts([
             'posts_per_page' => -1,

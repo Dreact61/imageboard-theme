@@ -10,7 +10,7 @@
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) && !username_exists($param);
                     }
                 ],
                 'password' => [
@@ -18,13 +18,16 @@
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) && strlen($param) >= 6;
                     }
                 ],
                 'description' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_textarea_field'
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
             ]
         ]);
@@ -75,22 +78,34 @@
                 'username' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field'
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                'description' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_textarea_field'
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'password' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field'
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'id' => [
                     'type' => 'integer',
                     'required' => true,
-                    'sanitize_callback' => 'absint'
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param) && (int)$param > 0;
+                    }
                 ]
             ]
         ]);
@@ -119,7 +134,10 @@
                 'id' => [
                     'type' => 'integer',
                     'required' => true,
-                    'sanitize_callback' => 'absint'
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param) && (int)$param > 0;
+                    }
                 ]
             ]
         ]);
@@ -157,21 +175,33 @@
                     'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'description' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_textarea_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'mark' => [
                     'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'author' => [
                     'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ]
             ]
         ]); 
@@ -183,20 +213,29 @@
             'callback' => 'edit_current_board_api',
             'permission_callback' => 'mw_is_board_owner',
             'args' => [
-                'name' => [
+                'name' => [                     
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'description' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_textarea_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'mark' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field'
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'id' => [
                     'type' => 'integer',
@@ -267,26 +306,41 @@
                     'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
                 ],
                 'description' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_textarea_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'parent' => [
                     'type' => 'integer',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'author' => [
                     'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'status' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
             ],
         ]);
@@ -301,18 +355,27 @@
                 'name' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field'
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'description' => [
                     'type' => 'string',
                     'required' => false,
-                    'sanitize_callback' => 'sanitize_textarea_field'
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'status' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
-                    'enum' => ['PRIVATE', 'PUBLIC']
+                    'enum' => ['PRIVATE', 'PUBLIC'],
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'id' => [
                     'type' => 'integer',
@@ -369,12 +432,18 @@
                 'content' => [
                     'type' => 'string',
                     'required' => true,
-                    'sanitize_callback' => 'sanitize_textarea_field'
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'author' => [
                     'type' => 'string',
-                    'required' => false,
+                    'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param);
+                    }
                 ],
                 'parent' => [
                     'type' => 'integer',
@@ -409,7 +478,10 @@
                 'id' => [
                     'type' => 'integer',
                     'required' => true,
-                    'sanitize_callback' => 'absint'
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
                 ]
             ]
         ]);

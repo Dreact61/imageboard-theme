@@ -2,27 +2,15 @@
     function handle_user_register(WP_REST_Request $request) {
     $params = $request->get_json_params();
 
-    if (empty($params)) {
-        return new WP_Error('missing_fields', 'Не все важные поля были заполнены', array("status" => 400));
-    }
-
     $username = sanitize_user( $params['username'] );
     $password = $params['password'];
-    $description = !empty($params['description']) ? $params['description'] : '';
+    $description = $params['description'] ?? '';
     $role = 'user';
-
-    if (!$params || !$username || !$password) {
-        return new WP_Error('missing_fields', 'Не все важные поля были заполнены', ["status" => 400]);
-    }
-
-    if (username_exists($username)) {
-        return new WP_Error('username_taken', 'Такое имя уже занято', array("status" => 400));
-    }
 
     $user_id = wp_insert_user(array(
         'user_login' => $username,
         'display_name' => $username,
-        'user_pass' => $password,
+        'user_pass' => $password, // хешируется!!!!
         'description' => $description,
         'role' => $role,
     ));
@@ -72,9 +60,6 @@ function handle_user_edit(WP_REST_Request $request) {
     $params = $request->get_json_params();
 
     $current_user = get_userdata($params['id']);
-    if(!$current_user) {
-        return new WP_Error('user_not_found', 'Пользователь не найден', ["status" => 404, "success" => false]);
-    }
 
     $current_username = $current_user->display_name;
     $current_desc = $current_user->description;
@@ -136,15 +121,10 @@ function handle_user_edit(WP_REST_Request $request) {
 }
 
 function handle_user_deletion(WP_REST_Request $request) {
-    require_once ABSPATH . 'wp-admin/includes/user.php';
+    require_once ABSPATH . 'wp-admin/includes/user.php'; // импорт для wp_delete_user()
     $id = $request->get_param('id');
-    
-    $user_exists = get_userdata($id);
-    if(!$user_exists) {
-        return new WP_Error('user_not_found', 'Пользователь не найден', ["status" => 404, "success" => false]);
-    }
 
-    $delete = wp_delete_user($id, null);
+    $delete = wp_delete_user($id, null); // вот тут оно применяется
     if(!$delete) {
         return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500, "success" => false]);
     }

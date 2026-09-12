@@ -1,20 +1,12 @@
 <?php
     function register_boards_api(WP_REST_Request $request) {
         $params = $request->get_json_params();
-
-        if (empty($params['name']) || empty($params['id'])) {
-            return new WP_Error('missing_fields', 'Не все важные поля были заполнены', ["status" => 400, "success" => false]);
-        }
         
         $name = $params['name'];
-        $description = empty($params['description']) ? '' : $params['description'];
+        $description = $params['description'] ?? '';
         $id = $params['id'];
         $author = $params['author'];
         $author_id = get_current_user_id();
-
-        if(empty($author_id)) {
-            return new WP_Error('author_not_defined', 'Пользователь не найден или не зарегистрирован', ["status" => 401, "success" => false]);
-        }
 
         $post_id = wp_insert_post([
             'post_type' => 'board',
@@ -53,14 +45,10 @@
     function fetch_current_board_api(WP_REST_Request $request) {
         $id = $request->get_param('id');
 
-        if(!$id) {
-            return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400, "success" => false]);
-        }
-
         $board = get_post($id);
         
-        if (empty($board)) {
-            return new WP_Error('board_not_found', "Доска не найдена", ["status" => 400, "success" => false]);
+        if (!$board) {
+            return new WP_Error('board_not_found', "Доска не найдена", ["status" => 404, "success" => false]);
         }
         
         $mark = get_post_meta($board->ID, 'board_mark', true);
@@ -89,7 +77,7 @@
                 'name' => $value->post_title,
                 'description' => get_post_meta($value->ID, 'thread_description', true),
                 'parent' => get_post_meta($value->ID, 'board_mark', true),
-                'author' => get_post_meta($value->ID, 'thread_description', true),
+                'author' => get_post_meta($value->ID, 'thread_author', true),
                 'createdAt' => get_the_date('Y-m-d H:i:s', $value->ID),
                 'status' => get_post_meta($value->ID, 'thread_status', true),
             ];
@@ -104,9 +92,6 @@
 
     function edit_current_board_api(WP_REST_Request $request) {
         $params = $request->get_json_params();
-        if (empty($params) || empty($params['id'])) {
-            return new WP_Error('not_defined', 'Недостоверные данные', ["success" => false, "status" => 400]);
-        }
 
         $id = $params['id'];
         $board = get_posts([
@@ -116,7 +101,7 @@
         ]);
         
         if (empty($board)) {
-            return new WP_Error('board_not_found', 'Доска не была найдена', ["success" => false, "status" => 404]);
+            return new WP_Error('board_not_found', 'Доска не найдена', ["success" => false, "status" => 404]);
         }
         $board = $board[0];
 
@@ -124,9 +109,9 @@
         $current_description = get_post_meta($board->ID, 'board_description', true);
         $current_mark = get_post_meta($board->ID, 'board_mark', true);
 
-        $new_name = isset($params['name']) ? $params['name'] : $board->post_title;
+        $new_name = isset($params['name']) ? $params['name'] : $current_name;
         $new_description = isset($params['description']) ? $params['description'] : $current_description;
-        $new_mark = isset($params['id']) ? $params['id'] : $current_mark;
+        $new_mark = isset($params['mark']) ? $params['mark'] : $current_mark;
 
         if($current_name === $new_name && $current_description === $new_description && $current_mark === $new_mark) {
             return new WP_REST_Response([
@@ -175,9 +160,6 @@
 
     function delete_current_board_api(WP_REST_Request $request) {
         $id = $request->get_param('id');
-        if(empty($id)) {
-            return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400, "success" => false]);
-        }
         
         $mark = get_post_meta($id, 'board_mark', true);
 
@@ -208,7 +190,7 @@
             'posts_per_page' => 1,
             'post_type' => 'board',
             'meta_key' => 'board_mark',
-            'meta_value' => $id,
+            'meta_value' => $mark,
             'post_status' => 'publish'
         ]);
         $board_id = $post_id[0]->ID;

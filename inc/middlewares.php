@@ -40,7 +40,11 @@ function mw_is_board_owner(WP_REST_Request $req) {
     }
 
     $board_author = get_post_meta(absint($req->get_param('id')), 'board_author', true);
-    $username = get_post(get_current_user_id(), 'user_login');
+    $username = get_userdata(get_current_user_id())->user_login;
+
+    if (!$username) {
+        return new WP_Error('rest_forbidden', 'Вы не авторизованы', ["status" => 401, "success" => false]);
+    }
 
     return $username === $board_author;
 }
@@ -52,7 +56,11 @@ function mw_is_thread_owner(WP_REST_Request $req) {
     }
 
     $thread_author = get_post_meta(absint($req->get_param('id')), 'thread_author', true);
-    $username = get_post(get_current_user_id(), 'user_login');
+    $username = get_userdata(get_current_user_id())->user_login;
+
+    if (!$username) {
+        return new WP_Error('rest_forbidden', 'Вы не авторизованы', ["status" => 401, "success" => false]);
+    }
 
     return $username === $thread_author;
 }
@@ -63,9 +71,12 @@ function mw_is_post_author(WP_REST_Request $req) {
         return $is_auth;
     }
 
-    $username = get_post(get_current_user_id(), 'user_login');
     $post_author = get_post_meta(absint($req->get_param('id')), 'post_author', true);
+    $username = get_userdata(get_current_user_id())->user_login;
 
+    if (!$username) {
+        return new WP_Error('rest_forbidden', 'Вы не авторизованы', ["status" => 401, "success" => false]);
+    }
     return $username === $post_author;
 }
 ?>
