@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios, {AxiosRequestConfig} from "axios";
 import type { Store_Users, User } from "../../types";
 
 const CUSTOM_API = process.env.CUSTOM_API
@@ -8,10 +8,10 @@ const getAxiosConfig = () => {
     return {
         withCredentials: true,
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json' as const,
         }
-    }
-} 
+    } satisfies AxiosRequestConfig
+}
 
 const storeUsers = create<Store_Users>((set, get) => ({
     error: null,

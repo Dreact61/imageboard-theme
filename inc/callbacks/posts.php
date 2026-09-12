@@ -2,12 +2,8 @@
     function imageboard_create_post(WP_REST_Request $request) {
         $params = $request->get_json_params();
 
-        if (empty($params['content']) || empty($params['parent'])) {
-            return new WP_Error('missing_fields', 'Не все важные поля были заполнены', ["status" => 400]);
-        }
-
         $content = $params['content'];
-        $author = isset($params['author']) && $params['author'] !== 'Anonymous' ? $params['author'] : 'Anonymous';
+        $author = $params['author'] ?? 'Anonymous';
         $parent = $params['parent'];
 
         $post_id = wp_insert_post([
@@ -50,20 +46,10 @@
 
     function delete_current_post_api(WP_REST_Request $request) {
         $id = $request->get_param('id');
-        if (!isset($id)) {
-            return new WP_Error('not_defined', 'Недостоверные данные', ["status" => 400]);
-        }
 
         $post_deletion = wp_delete_post($id, true);
         if(!$post_deletion) {
-            return new WP_Error(
-                'server_error',
-                'Ошибка на стороне сервера',
-                [
-                    "status" => 500,
-                    "success" => false
-                ]
-            );
+            return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500, "success" => false]);
         }
 
         return new WP_REST_Response([

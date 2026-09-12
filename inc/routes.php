@@ -480,7 +480,7 @@
                     'required' => true,
                     'sanitize_callback' => 'absint',
                     'validate_callback' => function($param) {
-                        return is_numeric($param);
+                        return is_numeric($param) && $param > 0;
                     }
                 ]
             ]

@@ -76,9 +76,16 @@ export type Store_Threads = {
 export type Post = {
     id?: number,
     content: string,
-    author?: string | 'Anonymous',
-    createdAt: Date,
+    author: string | 'Anonymous',
+    createdAt?: Date,
     parent: number // Thread.id
+}
+
+export type Store_Posts = {
+    error: string | null,
+    loading: boolean,
+    createPost: (data: Post) => Promise<void>,
+    deletePost: (id: number) => Promise<void>
 }
 
 //=========================
@@ -90,4 +97,15 @@ export type Log = {
     msg?: string,
     status: number,
     data?: unknown
+}
+
+export type Store_settings = {
+    currentTheme: 'dark' | 'light' | 'custom',
+    logs: Log[],
+
+    changeTheme: () => Promise<void>,
+    setCustomTheme: (colors:number[]) => Promise<void>,
+
+    showLogs: () => void,
+    showLogsUntil: (num: number) => void
 }
