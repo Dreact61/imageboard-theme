@@ -37,6 +37,8 @@ export type Store_Boards = {
     log: Log | null,
     currentBoard: Board | null,
     currentBoardThreads: Thread[],
+    allBoards: Board[],
+    fetchAllBoards: () => Promise<void>,
     fetchThisBoard: (id: number) => Promise<void>,
     createNewBoard: (data:Board) => Promise<void>,
     editBoard: (id: number, data: Board) => Promise<void>,
@@ -94,18 +96,31 @@ export type Store_Posts = {
 
 export type Log = {
     success: boolean,
-    msg?: string,
+    msg?: string | null,
     status: number,
-    data?: unknown
+    data?: unknown | null
+}
+
+export type logFetchingFilters = {
+    success?: boolean | null,
+    msg?: string | null,
+    status?: number | null,
+    dataType?: unknown,
+    range?: [
+        begin: number | null,
+        end: number | null
+    ] | null,
+    isLast?: true
 }
 
 export type Store_settings = {
+    error: string | null,
+    loading: boolean,
     currentTheme: 'dark' | 'light' | 'custom',
     logs: Log[],
 
     changeTheme: () => Promise<void>,
-    setCustomTheme: (colors:number[]) => Promise<void>,
 
-    showLogs: () => void,
-    showLogsUntil: (num: number) => void
+    showLogs: () => Log[],
+    recordLog: (data:Log) => Promise<Log | null>
 }

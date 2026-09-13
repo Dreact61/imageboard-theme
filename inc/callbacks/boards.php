@@ -41,6 +41,17 @@
         ], 201);
     }
 
+    function fetch_all_boards_api() {
+        $boards = get_posts([
+            'posts_per_page' => -1,
+            'post_type' => 'board',
+            'post_status' => 'publish'
+        ]);
+
+        return new WP_REST_Response([
+            'boards' => $boards
+        ]);
+    }
 
     function fetch_current_board_api(WP_REST_Request $request) {
         $id = $request->get_param('id');

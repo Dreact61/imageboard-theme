@@ -19,6 +19,50 @@ const storeBoards = create<Store_Boards>((set, get) => ({
     log: null,
     currentBoard: null,
     currentBoardThreads: [],
+    allBoards: [],
+
+    fetchAllBoards: async () => {
+        try{
+            set({loading: true, error: null, log: null})
+            let result_log = {
+                success: false,
+                msg: '',
+                status: 0,
+                data: {}
+            }
+
+            const res = await axios.get(`${CUSTOM_API}/boards/all`)
+            if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+
+            const boards:Board[] = res.data.boards
+
+            result_log = {
+                success: res.data.success,
+                msg: 'Доска успешно загружена!',
+                status: res.status,
+                data: boards
+            }
+
+            set({
+                log: result_log,
+                allBoards: boards
+            })
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            set({
+                error: errorMsg,
+                log: {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                    data: {}
+                }
+            })
+        } finally {
+            set({loading: false})
+        }
+    },
 
     fetchThisBoard: async (id) => {
         try {

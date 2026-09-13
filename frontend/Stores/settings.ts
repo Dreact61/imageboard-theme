@@ -1,7 +1,9 @@
 import {create} from 'zustand'
-import type { Store_settings } from '../../types'
+import type { Store_settings, Log } from '../../types'
 
 const storeSettings = create<Store_settings>((set, get) => ({
+    error: null,
+    loading: false,
     currentTheme: 'light',
     logs: [],
 
@@ -12,15 +14,30 @@ const storeSettings = create<Store_settings>((set, get) => ({
         if (isThemeLight) set({currentTheme: 'dark'})
         if (!isThemeLight) set({currentTheme: 'light'})
     },
-    setCustomTheme: async (colors) => {},
 
     showLogs: () => {
         const {logs} = get()
-        console.log(logs)
+        return logs
     },
-    showLogsUntil: (num) => {
-        const {logs} = get()
-        console.log(logs.slice(-(Math.abs(num))))
+
+    recordLog: async(data) => {
+        try {
+            set({loading: true, error: null})
+
+            const logData = {
+                success: data.success,
+                msg: data?.msg || null,
+                status: data.status,
+                data: data?.data || null
+            }
+            set((state) => ({logs: [...state.logs, logData]}))
+            return logData
+        } catch(err:any) {
+            set({error: 'Не удалось записать лог'})
+            return null
+        } finally {
+            set({loading: false})
+        }
     },
 }))
 

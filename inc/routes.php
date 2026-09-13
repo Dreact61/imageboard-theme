@@ -148,6 +148,14 @@
     //=========================
 
     add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/boards/all', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => 'fetch_all_boards_api',
+            'permission_callback' => '__return_true'
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', "/boards/(?P<id>\d+)", [
             'methods' => WP_REST_Server::READABLE,
             'callback' => 'fetch_current_board_api',

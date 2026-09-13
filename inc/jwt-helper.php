@@ -1,7 +1,7 @@
 <?php
 if(!defined('ABSPATH')) exit;
-
-require_once get_temp_dir() . '/vendor/autoload.php';
+ 
+require_once plugin_dir_path(__DIR__) . 'vendor/autoload.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;

@@ -1,10 +1,16 @@
+const webpack = require('webpack');
+
 const path = require('path');
-const { DotenvPlugin } = require('webpack');
+const dotenv = require('dotenv');
+
+const env = dotenv.config().parsed || {}
 
 module.exports = {
   entry: './root.jsx',
   plugins: [
-    new DotenvPlugin()
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify(env),
+    }),
   ],
   output: {
     path: path.resolve(__dirname, 'build'),
