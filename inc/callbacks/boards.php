@@ -49,6 +49,7 @@
         ]);
 
         return new WP_REST_Response([
+            'success' => true,
             'boards' => $boards
         ]);
     }
