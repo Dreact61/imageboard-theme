@@ -5,6 +5,7 @@ import { _body, _borders, _button, _button_cont, _card, _container, _text_error,
 import storeBoards from '../Stores/boardsStore'
 
 import { useSyncExternalStore, useEffect } from 'react'
+import { Link } from 'react-router'
 
 export default function MainPage() {
     const allBoards = useSyncExternalStore(storeBoards.subscribe, () => storeBoards.getState().allBoards, () => [])
@@ -54,7 +55,9 @@ export default function MainPage() {
                 </div>
 
                 <div className={_button_cont}>
-                    <button type="button" className={_button}>Создать Доску</button>
+                    <Link to="/boards/create">
+                        <button type="button" className={_button}>Создать Доску</button>
+                    </Link>
                 </div>
             </main>
 

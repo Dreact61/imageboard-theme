@@ -11,8 +11,9 @@ export type Store_Users = {
     loading: boolean,
     log: Log | null,
     currentUser: User | null,
-    register: (data:User) => Promise<void>,
-    login: (username: string, password: string) => Promise<void>,
+    fetchThisUser: (id: number) => Promise<Log>,
+    register: (data:User) => Promise<Log>,
+    login: (username: string, password: string) => Promise<Log>,
     logout: () => Promise<void>,
     editUser: (data:User) => Promise<void>,
     deleteUser: (id: number) => Promise<void>

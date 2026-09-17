@@ -43,9 +43,10 @@ export default function BoardPage() {
                 <p>{currentBoard.description}</p>
                 <small>Создано {currentBoard.author} в {currentBoard.createdAt}</small>   
             </section>
-
             <Footer />
         </div>
     }
     return mainContent
 }
+
+// НЕДОПИСАНО

@@ -32,6 +32,20 @@
     ], 201);
 }
 
+function fetch_current_user(WP_REST_Request $request) {
+    $id = $request->get_param('id');
+    
+    $user = get_userdata($id);
+    if (!$user) {
+        return new WP_Error('user_not_found', 'Пользователь не найден', ["status" => 404, "success" => false]);
+    }
+
+    return new WP_REST_Response([
+        'success' => true,
+        'user' => $user
+    ], 200);
+}
+
 function handle_user_login(WP_REST_Request $request) {
     $params = $request->get_json_params();
     
@@ -44,6 +58,9 @@ function handle_user_login(WP_REST_Request $request) {
     }
 
     $user_role = !empty($user->roles) ? $user->roles[0] : 'user';
+
+    $token = DCHAN_JWT::generate($user->ID);
+    setcookie('dchan_auth_token', $token, time() + (DAY_IN_SECONDS * 7), '/', '', false, true);
         
     return new WP_REST_Response([
         'success' => true,
@@ -134,4 +151,15 @@ function handle_user_deletion(WP_REST_Request $request) {
         "id" => $id,
     ], 200);
 }
+
+function handle_user_logout(WP_REST_Request $request) {
+    setcookie('dchan_auth_token', '', time() - 3600, '/', '', false, true);
+    wp_set_current_user(0);
+
+    return new WP_REST_Response([
+        'success' => true,
+        'message' => 'Вы успешно вышли из системы'
+    ]);
+}
+
 ?>

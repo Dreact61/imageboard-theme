@@ -34,6 +34,24 @@
     });
 
     add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/users/(?P<id>\d+)', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => 'fetch_current_user',
+            'permission_callback' => '__return_true',
+            'args' => [
+                'id' => [
+                    'type' => 'integer',
+                    'required' => true,
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
+                ]
+            ]
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', '/login', array(
             'methods' => 'POST',
             'callback' => 'handle_user_login',
@@ -143,6 +161,14 @@
         ]);
     });
 
+    add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/logout', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => 'handle_user_logout',
+            'permission_callback' => 'mw_is_authenticated'
+        ]);
+    });
+
     //=========================
     // BOARDS
     //=========================
@@ -192,7 +218,7 @@
                     'required' => false,
                     'sanitize_callback' => 'sanitize_textarea_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) || is_null($param);
                     }
                 ],
                 'mark' => [

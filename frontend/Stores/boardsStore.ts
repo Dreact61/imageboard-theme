@@ -148,7 +148,6 @@ const storeBoards = create<Store_Boards>((set, get) => ({
             set({
                 log: result_log
             })
-
             return result_log
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
