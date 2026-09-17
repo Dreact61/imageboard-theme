@@ -38,9 +38,11 @@ export default function BoardPage() {
         <div className={_body}>
             <Header />
 
-            <main className={_main}>
-
-            </main>
+            <section className={_main}>
+                <strong>{currentBoard.name} ({currentBoard.mark})</strong>
+                <p>{currentBoard.description}</p>
+                <small>Создано {currentBoard.author} в {currentBoard.createdAt}</small>   
+            </section>
 
             <Footer />
         </div>

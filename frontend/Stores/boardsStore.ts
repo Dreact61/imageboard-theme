@@ -79,7 +79,6 @@ const storeBoards = create<Store_Boards>((set, get) => ({
 
             const board:Board = res.data.board
             const threads:Thread[] = res.data.threads
-            if (board.createdAt instanceof Date) board.createdAt = board.createdAt.toISOString()
 
             const currentBoard = {
                 id: id,
@@ -150,18 +149,21 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 log: result_log
             })
 
+            return result_log
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            const Log = {
+                success: false,
+                msg: errorMsg,
+                status: err.response?.status || 500,
+                data: {}
+            }
             console.error(errorMsg)
             set({
                 error: errorMsg,
-                log: {
-                    success: false,
-                    msg: errorMsg,
-                    status: err.response?.status || 500,
-                    data: {}
-                }
+                log: Log
             })
+            return Log
         } finally {
             set({loading: false})
         }
