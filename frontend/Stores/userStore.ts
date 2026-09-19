@@ -21,8 +21,6 @@ const storeUsers = create<Store_Users>()(
         loading: false,
         log: null,
         currentUser: null,
-        refreshToken: null,
-        accessToken: null,
 
         fetchThisUser: async (id) => {
             try {
@@ -34,7 +32,7 @@ const storeUsers = create<Store_Users>()(
                     data: {}
                 }
 
-                const res = await axios.post(`${CUSTOM_API}/users${id}`, id, getAxiosConfig())
+                const res = await axios.post(`${CUSTOM_API}/users/fetch`, {id})
                 if(!res.data.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
 
                 const user = res.data.user
@@ -43,14 +41,8 @@ const storeUsers = create<Store_Users>()(
                     success: res.data?.success,
                     msg: '',
                     status: res.status || 200,
-                    data: {
-                        id: user.id,
-                        username: user.username,
-                        description: user.description,
-                        role: user.role
-                    }
+                    data: user
                 }
-                
                 set({log: result_log})
                 return result_log
             } catch(err:any) {
@@ -195,7 +187,7 @@ const storeUsers = create<Store_Users>()(
             }
         },
 
-        editUser: async (data) => {
+        editUser: async (data) => { /* СЫПЕТ ХУЙНЕЙ (401). НАЧАТЬ ОТСЮДА И ИСПРАВИТЬ */
             try {
                 set({loading: true, error: null, log: null})
                 let result_log = {
@@ -211,7 +203,7 @@ const storeUsers = create<Store_Users>()(
                     description: data.description || null,
                     password: data.password || null
                 }
-                const res = await axios.put(`${CUSTOM_API}/users/${data.id}/edit`, editData, getAxiosConfig())
+                const res = await axios.put(`${CUSTOM_API}/users/edit`, editData, getAxiosConfig())
                 if (!res.data.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
                 const user:User = res.data.user
@@ -234,19 +226,23 @@ const storeUsers = create<Store_Users>()(
                 if (currentUser?.id === user.id) {
                     set({currentUser: editedUser})
                 }
+                console.log(currentUser)
                 set({log: result_log})
+                return result_log
             } catch(err:any) {
                 const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
                 console.error(errorMsg)
-                set({
-                    error: errorMsg,
-                    log: {
+                const Log = {
                         success: false,
                         msg: errorMsg,
                         status: err.response?.status || 500,
                         data: {}
                     }
+                set({
+                    error: errorMsg,
+                    log: Log
                 })
+                return Log
             } finally {
                 set({loading:false})
             }
@@ -272,18 +268,22 @@ const storeUsers = create<Store_Users>()(
                     data: res.data.id
                 }
                 set({log: result_log})
+                
+                return result_log
             } catch(err:any) {
                 const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
                 console.error(errorMsg)
-                set({
-                    error: errorMsg,
-                    log: {
+                const Log = {
                         success: false,
                         msg: errorMsg,
                         status: err.response?.status || 500,
                         data: {}
                     }
+                set({
+                    error: errorMsg,
+                    log: Log
                 })
+                return Log
             } finally {
                 set({loading:false})
             }

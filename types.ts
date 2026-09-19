@@ -1,7 +1,7 @@
 export type User = {
     id?: number,
-    username: string,
-    description?: string,
+    username: string | null,
+    description?: string | null,
     role?: 'user' | 'admin',
     password?: string | null
 }
@@ -15,8 +15,8 @@ export type Store_Users = {
     register: (data:User) => Promise<Log>,
     login: (username: string, password: string) => Promise<Log>,
     logout: () => Promise<void>,
-    editUser: (data:User) => Promise<void>,
-    deleteUser: (id: number) => Promise<void>
+    editUser: (data:User) => Promise<Log>,
+    deleteUser: (id: number) => Promise<Log>
 }
 
 //=========================

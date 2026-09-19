@@ -8,6 +8,8 @@ import BoardCreateionPage from "./frontend/Pages/boardCreationPage";
 import RegisterPage from "./frontend/Pages/userRegisterPage";
 import LoginPage from "./frontend/Pages/userLoginPage";
 import ProfilePage from "./frontend/Pages/profilePage";
+import MyProfilePage from "./frontend/Pages/myProfilePage";
+import EditProfilePage from "./frontend/Pages/editProfilePage";
 
 document.addEventListener('DOMContentLoaded', () => {
   createRoot(document.getElementById('root')).render(
@@ -18,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <Route path="/boards/create" element={<BoardCreateionPage/>}></Route>
                 <Route path="/boards/:board_mark" element={<BoardPage/>}></Route>
 
+                <Route path="/my-profile" element={<MyProfilePage />}></Route>
+                <Route path="/my-profile/edit" element={<EditProfilePage />}></Route>
                 <Route path="/register" element={<RegisterPage />}></Route>
                 <Route path="/login" element={<LoginPage />}></Route>
                 <Route path="/users/:user_id" element={<ProfilePage />}></Route>

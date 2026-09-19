@@ -34,7 +34,7 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', '/users/(?P<id>\d+)', [
+        register_rest_route('myapi/v1', '/users/fetch', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'fetch_current_user',
             'permission_callback' => '__return_true',
@@ -79,7 +79,7 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/users/(?P<id>\d+)/edit", [
+        register_rest_route('myapi/v1', "/users/edit", [
             'methods' => WP_REST_Server::EDITABLE,
             'callback' => 'handle_user_edit',
             'permission_callback' => function(WP_REST_Request $req) {
@@ -90,7 +90,7 @@
 
                 $user_id = get_current_user_id();
                 $target_id = absint($req->get_param('id'));
-                return $user_id === (int) $target_id;
+                return $user_id === $target_id;
             },
             'args' => [
                 'username' => [

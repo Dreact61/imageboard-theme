@@ -3,6 +3,8 @@ export const _bg_color_main = `bg-[#382772]/50`
 //OTHERS
 export const _borders = `${_bg_color_main} border-2 rounded-md border-[#3f2b8a]`
 export const _img = `h-25 w-25 border mt-2 border-[#3f2b8a] border-2`
+export const _bio = `text-[#f3c4ff] font-bold ${_borders} w-full text-left p-2`
+export const _bio_cont = `flex flex-col gap-2 text-[16px] w-full items-start justify-center px-2`
 //TEXTS
 export const _text = 'text-[#fff7ec] text-wrap'
 export const _text_info = `text-center text-[#7e7e7e]`
@@ -12,6 +14,9 @@ export const _hypertext = `text-purple-500 underline duration-300 transition-all
 //BUTTONS
 export const _button = `w-40 px-4 h-10 border-2 rounded-md border-[#3f2b8a] bg-[#382772] text-[#fff7ec] hover:bg-[#3f2b8a] hover:border-[#5a3ec4] hover:shadow-[0_0_15px_rgba(90,62,196,0.5)] transition-all duration-300 ease-in-out cursor-pointer`
 export const _button_cont = `w-full flex items-center justify-evenly`
+
+export const _profiles_btn_cont = `${_button_cont} grid grid-cols-2 gap-4 justify-items-center`
+export const _profiles_btn = `${_button} w-full text-center`
 //INPUTS
 export const _inputField = `w-full px-4 py-2 border-2 rounded-md border-[#3f2b8a] bg-[#07091a]/60 text-[#fff7ec] placeholder:text-[#fff7ec]/40 focus:outline-none focus:border-[#5a3ec4] focus:shadow-[0_0_10px_rgba(90,62,196,0.3)] transition-all duration-300`
 export const _textareaField = `${_inputField} resize-none h-25`
@@ -28,3 +33,5 @@ export const _footer = `${_borders} flex flex-col border-2 w-full mt-auto mt-4 p
 export const _main = `flex flex-col justify-center items-center p-6 border w-1/2 ${_borders}`
 export const _section = `flex flex-col text-2xl w-full text-center justify-center items-center py-2 mb-5 border-b-2 ${_borders}`
 export const _body = `${_text} flex flex-col absolute left-0 top-0 items-center justify-around w-screen min-h-screen bg-[#07091a] p-5`
+
+export const _profiles_body = `${_body} justify-center gap-5`

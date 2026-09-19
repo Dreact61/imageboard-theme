@@ -10,7 +10,7 @@ export default function Header() {
         <header className={_header}>
             <div className="flex-row flex w-full items-center justify-around border-b-2 border-[#3f2b8a] pb-2">
                 <h2 className="text-2xl">D-Chan</h2>
-                <p>{currentUser ? <Link  className={_hypertext} to={`/users/me`}>{currentUser.username}</Link> : <Link to="/register" className={_hypertext}>Регистрация</Link>}</p>
+                <p>{currentUser ? <Link  className={_hypertext} to={`/my-profile`}>{currentUser.username}</Link> : <Link to="/register" className={_hypertext}>Регистрация</Link>}</p>
             </div>
             <img className={_img} src="../../public/pictures/ico.png" alt="D-ch logo" />
         </header>

@@ -34,7 +34,7 @@
 
 function fetch_current_user(WP_REST_Request $request) {
     $id = $request->get_param('id');
-    
+
     $user = get_userdata($id);
     if (!$user) {
         return new WP_Error('user_not_found', 'Пользователь не найден', ["status" => 404, "success" => false]);
@@ -42,7 +42,12 @@ function fetch_current_user(WP_REST_Request $request) {
 
     return new WP_REST_Response([
         'success' => true,
-        'user' => $user
+        'user' => [
+            'id' => $user->ID,
+            'username' => $user->user_nicename,
+            'description' => $user->description,
+            'role' => $user->roles[0]
+        ]
     ], 200);
 }
 
