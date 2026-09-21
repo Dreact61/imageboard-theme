@@ -1,7 +1,7 @@
 export type User = {
     id?: number,
-    username: string,
-    description?: string,
+    username: string | null,
+    description?: string | null,
     role?: 'user' | 'admin',
     password?: string | null
 }
@@ -11,11 +11,12 @@ export type Store_Users = {
     loading: boolean,
     log: Log | null,
     currentUser: User | null,
-    register: (data:User) => Promise<void>,
-    login: (username: string, password: string) => Promise<void>,
+    fetchThisUser: (id: number) => Promise<Log>,
+    register: (data:User) => Promise<Log>,
+    login: (username: string, password: string) => Promise<Log>,
     logout: () => Promise<void>,
-    editUser: (data:User) => Promise<void>,
-    deleteUser: (id: number) => Promise<void>
+    editUser: (data:User) => Promise<Log>,
+    deleteUser: (id: number) => Promise<Log>
 }
 
 //=========================
@@ -27,7 +28,7 @@ export type Board = {
     name: string,
     description?: string,
     mark: string,
-    author?: number | string,
+    author?: string | number,
     createdAt?: string
 }
 
@@ -39,7 +40,7 @@ export type Store_Boards = {
     currentBoardThreads: Thread[],
     allBoards: Board[],
     fetchAllBoards: () => Promise<void>,
-    fetchThisBoard: (id: number) => Promise<void>,
+    fetchThisBoard: (mark: string) => Promise<Log>,
     createNewBoard: (data:Board) => Promise<Log>,
     editBoard: (id: number, data: Board) => Promise<void>,
     deleteBoard: (id: number) => Promise<void>

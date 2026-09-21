@@ -1,4 +1,27 @@
 <?php
+function mw_determine_user_from_jwt($user_id) {
+    if ($user_id) {
+        return $user_id;
+    }
+
+    $token = $_COOKIE['dchan_auth_token'] ?? '';
+    if (empty($token)) {
+        return $user_id;
+    }
+
+    $token_data = DCHAN_JWT::validate($token);
+    if (empty($token_data['uid']) || !$token_data) {
+        return $user_id;
+    }
+
+    $detected_user_id = (int) $token_data['uid'];
+    
+    $fresh_token = DCHAN_JWT::generate($detected_user_id);
+    setcookie('dchan_auth_token', $fresh_token, time() + (DAY_IN_SECONDS * 7), '/', '', false, true);
+
+    return $detected_user_id;
+};
+
 function mw_is_authenticated(WP_REST_Request $req) {
     $token = $_COOKIE['dchan_auth_token'] ?? '';
 

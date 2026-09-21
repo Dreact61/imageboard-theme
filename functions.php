@@ -40,4 +40,9 @@ require_once __DIR__ . "/inc/widgets.php";
 require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/inc/jwt-helper.php";
 require_once __DIR__ . "/inc/middlewares.php";
+
+add_filter('allowed_redirect_hosts', function($hosts) {
+    $hosts[] = 'localhost:8080';
+    return $hosts;
+});
 ?>

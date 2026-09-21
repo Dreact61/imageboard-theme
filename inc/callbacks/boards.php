@@ -7,6 +7,7 @@
         $id = $params['id'];
         $author = $params['author'];
         $author_id = get_current_user_id();
+        $mark = $params['mark'];
 
         $post_id = wp_insert_post([
             'post_type' => 'board',
@@ -16,7 +17,7 @@
             'post_author' => $author_id,
             'meta_input' => [
                 'board_description' => $description,
-                'board_mark' => $id,
+                'board_mark' => $mark,
                 'board_author' => $author,
             ],
         ]);
@@ -55,9 +56,16 @@
     }
 
     function fetch_current_board_api(WP_REST_Request $request) {
-        $id = $request->get_param('id');
+        $mark = $request->get_param('mark');
 
-        $board = get_post($id);
+        $board_post = get_posts([
+            'post_type' => 'board',
+            'posts_per_page' => 1,
+            'post_status' => 'publish',
+            'meta_key' => 'board_mark',
+            'meta_value' => $mark
+        ]);
+        $board = $board_post[0];
         
         if (!$board) {
             return new WP_Error('board_not_found', "Доска не найдена", ["status" => 404, "success" => false]);
