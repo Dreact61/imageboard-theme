@@ -10,7 +10,7 @@
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param) && !username_exists($param);
+                        return is_string($param) && !username_exists($param) && mb_strlen($param) >= 4;
                     }
                 ],
                 'password' => [
@@ -18,7 +18,7 @@
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param) && strlen($param) >= 6;
+                        return is_string($param) && mb_strlen($param) >= 6;
                     }
                 ],
                 'description' => [
@@ -44,7 +44,7 @@
                     'required' => true,
                     'sanitize_callback' => 'absint',
                     'validate_callback' => function($param) {
-                        return is_numeric($param);
+                        return is_numeric($param) && (int)$param > 0;
                     }
                 ]
             ]
@@ -61,7 +61,7 @@
                     'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
-                    'validate_callback' => function($param, $req, $key) {
+                    'validate_callback' => function($param) {
                         return is_string($param);
                     }
                 ),
@@ -70,7 +70,7 @@
                     'required' => true,
                     'type' => 'string',
                     'sanitize_callback' => 'sanitize_text_field',
-                    'validate_callback' => function($param, $req, $key) {
+                    'validate_callback' => function($param) {
                         return is_string($param);
                     }
                 )
@@ -83,12 +83,13 @@
             'methods' => WP_REST_Server::EDITABLE,
             'callback' => 'handle_user_edit',
             'permission_callback' => function(WP_REST_Request $req) {
-                $is_auth = mw_is_authenticated($req);
-                if(!$is_auth) {
-                    return $is_auth;
-                }
+                $user_id = mw_determine_user_from_jwt(absint($req->get_param('id')));
 
-                $user_id = get_current_user_id();
+                if (!$user_id || is_wp_error($user_id)) {
+                    return new WP_Error('rest_forbidden', 'Вы не авторизованы', ["status" => 401]);
+                }
+                wp_set_current_user( $user_id );
+
                 $target_id = absint($req->get_param('id'));
                 return $user_id === $target_id;
             },
@@ -98,7 +99,7 @@
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) && mb_strlen($param) >= 4;
                     }
                 ],
                'description' => [
@@ -114,7 +115,7 @@
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) && mb_strlen($param) >= 6;
                     }
                 ],
                 'id' => [
@@ -130,8 +131,8 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', '/users/(?P<id>\d+)/delete', [
-            'methods' => WP_REST_Server::DELETABLE,
+        register_rest_route('myapi/v1', '/users/delete', [
+            'methods' => WP_REST_Server::ALLMETHODS,
             'callback' => 'handle_user_deletion',
             'permission_callback' => function(WP_REST_Request $req) {
                 $is_admin = mw_is_admin($req);
@@ -139,12 +140,11 @@
                     return true;
                 }
                 
-                $is_auth = mw_is_authenticated($req);
-                if (is_wp_error($is_auth)) {
-                    return $is_auth;
+                $user_id = mw_determine_user_from_jwt(absint($req->get_param('id')));
+                if (is_wp_error($user_id)) {
+                    return $user_id;
                 }
 
-                $user_id = get_current_user_id();
                 $target_id = absint($req->get_param('id'));
                 return $user_id === (int)$target_id;
             },
@@ -165,7 +165,7 @@
         register_rest_route('myapi/v1', '/logout', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'handle_user_logout',
-            'permission_callback' => 'mw_is_authenticated'
+            'permission_callback' => 'mw_determine_user_from_jwt'
         ]);
     });
 
@@ -182,17 +182,17 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/boards/(?P<id>\d+)", [
-            'methods' => WP_REST_Server::READABLE,
+        register_rest_route('myapi/v1', "/boards", [
+            'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'fetch_current_board_api',
             'permission_callback' => '__return_true',
             'args' => [
-                'id' => [
-                    'type' => 'integer',
+                'mark' => [
+                    'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_numeric($param);
+                        return is_string($param) && mb_strlen($param) > 0;
                     }
                 ],
             ],

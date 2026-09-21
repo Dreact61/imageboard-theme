@@ -160,8 +160,6 @@ const storeUsers = create<Store_Users>()(
                 return Log
             } finally {
                 set({loading:false})
-                const {currentUser} = get()
-                console.log(currentUser)
             }
         },
 
@@ -187,7 +185,7 @@ const storeUsers = create<Store_Users>()(
             }
         },
 
-        editUser: async (data) => { /* СЫПЕТ ХУЙНЕЙ (401). НАЧАТЬ ОТСЮДА И ИСПРАВИТЬ */
+        editUser: async (data) => {
             try {
                 set({loading: true, error: null, log: null})
                 let result_log = {
@@ -197,12 +195,18 @@ const storeUsers = create<Store_Users>()(
                     data: {}
                 }
                 
-                const editData = {
+                let editData = {
                     id: data.id,
-                    username: data.username || null,
-                    description: data.description || null,
-                    password: data.password || null
+                    username: data.username,
+                    description: data.description,
+                    password: data.password
                 }
+
+                if (data.username && data.username.length < 4) throw new Error('Слишком малая длина имени пользователя.')
+                if (data.password && data.password.length < 6) throw new Error('Слишком малая длина пароля.')
+
+                if (editData.username === null && editData.description === null && editData.password === null) throw new Error('Ничего не изменилось.')
+
                 const res = await axios.put(`${CUSTOM_API}/users/edit`, editData, getAxiosConfig())
                 if (!res.data.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
@@ -211,8 +215,7 @@ const storeUsers = create<Store_Users>()(
                     id: data.id,
                     username: user.username,
                     description: user.description,
-                    role: user.role,
-                    password: editData?.password ? user.password : null
+                    role: user.role
                 }
 
                 result_log = {
@@ -222,12 +225,7 @@ const storeUsers = create<Store_Users>()(
                     data: editedUser
                 }
 
-                const {currentUser} = get()
-                if (currentUser?.id === user.id) {
-                    set({currentUser: editedUser})
-                }
-                console.log(currentUser)
-                set({log: result_log})
+                set({log: result_log, currentUser: editedUser})
                 return result_log
             } catch(err:any) {
                 const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
@@ -258,7 +256,7 @@ const storeUsers = create<Store_Users>()(
                     data: {}
                 }
 
-                const res = await axios.delete(`${CUSTOM_API}/users/${id}/delete`, getAxiosConfig())
+                const res = await axios.post(`${CUSTOM_API}/users/delete`, {id}, getAxiosConfig())
                 if (!res.data?.success) throw new Error(res.data?.message || res.data?.code || 'error_unknown')
 
                 result_log = {

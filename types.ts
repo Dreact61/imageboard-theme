@@ -28,7 +28,7 @@ export type Board = {
     name: string,
     description?: string,
     mark: string,
-    author?: number | string,
+    author?: string | number,
     createdAt?: string
 }
 
@@ -40,7 +40,7 @@ export type Store_Boards = {
     currentBoardThreads: Thread[],
     allBoards: Board[],
     fetchAllBoards: () => Promise<void>,
-    fetchThisBoard: (id: number) => Promise<void>,
+    fetchThisBoard: (mark: string) => Promise<Log>,
     createNewBoard: (data:Board) => Promise<Log>,
     editBoard: (id: number, data: Board) => Promise<void>,
     deleteBoard: (id: number) => Promise<void>

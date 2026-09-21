@@ -9,7 +9,7 @@
 
     $user_id = wp_insert_user(array(
         'user_login' => $username,
-        'display_name' => $username,
+        'user_nicename' => $username,
         'user_pass' => $password, // хешируется!!!!
         'description' => $description,
         'role' => $role,
@@ -71,7 +71,7 @@ function handle_user_login(WP_REST_Request $request) {
         'success' => true,
         'user' => [
             'id' => $user->ID,
-            'username' => $user->user_login,
+            'username' => $user->user_nicename,
             'description' => $user->description,
             'role' => $user_role,
         ],
@@ -81,37 +81,39 @@ function handle_user_login(WP_REST_Request $request) {
 function handle_user_edit(WP_REST_Request $request) {
     $params = $request->get_json_params();
 
-    $current_user = get_userdata($params['id']);
-
-    $current_username = $current_user->display_name;
-    $current_desc = $current_user->description;
-    $current_pass = $current_user->user_pass;
-
-    $new_username = $params['username'] ?? $current_username;
-    $new_desc = $params['description'] ?? $current_desc;
-    $new_pass = $params['password'] ?? $current_pass;
+    $user_id = get_current_user_id();
+    $current_user = get_userdata($user_id);
 
     $userdata = [
-        'ID' => $params['id']
+        'ID' => $user_id
     ];
 
     $has_changes = false;
-    $is_pass_changed = (!empty($new_pass)) && !wp_check_password($new_pass, $current_pass, $params['id']);
 
-    if(isset($new_desc) && $new_desc !== $current_desc) {
-        $userdata['description'] = $new_desc;
+    if (isset($params['username']) && $params['username'] !== $current_user->user_nicename) {
+        $userdata['user_nicename'] = $params['username'];
         $has_changes = true;
-    } 
-
-    if (isset($new_username) && $new_username !== $current_username) {
-        $userdata['display_name'] = $new_username;
-        $has_changes = true;
+    } else {
+        $userdata['user_nicename'] = $current_user->user_nicename;
     }
 
-    if ($is_pass_changed) {
-        $userdata['user_pass'] = $new_pass;
+    if (isset($params['description']) && $params['description'] !== $current_user->description) {
+        $userdata['description'] = $params['description'];
         $has_changes = true;
+    } else {
+        $userdata['description'] = $current_user->description;
     }
+
+    if (!empty($params['password'])) {
+        $is_same_pass = wp_check_password($params['password'], $current_user->user_pass, $user_id);
+        if (!$is_same_pass) {
+            $userdata['user_pass'] = $params['password'];
+            $has_changes = true;
+        }
+    } else {
+        $userdata['user_pass'] = $current_user->user_pass;
+    }
+
 
     if (!$has_changes) {
         return new WP_REST_Response([
@@ -132,12 +134,13 @@ function handle_user_edit(WP_REST_Request $request) {
             ]);
     }
 
+    $updated_user = get_userdata($user_id);
     return new WP_REST_Response([
         "success" => true,
         "user" => [
             'id' => $params['id'],
-            'name' => $new_username ?? '',
-            'description' => $new_desc ?? ''
+            'username' => $updated_user->user_nicename,
+            'description' => $updated_user->description
         ]
     ], 200);
 }

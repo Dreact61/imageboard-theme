@@ -25,6 +25,8 @@ export default function BoardCreateionPage() {
             alert('Вы не можете выполнить данное действие т.к. вы не авторизованы.')
             return
         }
+
+        if (!currentUser || !currentUser.username) return
         const data = {
             name: boardName,
             description: boardDesc || undefined,

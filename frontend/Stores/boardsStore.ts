@@ -64,7 +64,7 @@ const storeBoards = create<Store_Boards>((set, get) => ({
         }
     },
 
-    fetchThisBoard: async (id) => {
+    fetchThisBoard: async (mark) => {
         try {
             set({loading: true, error: null, log: null})
             let result_log = {
@@ -74,20 +74,11 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 data: {}
             }
 
-            const res = await axios.get(`${CUSTOM_API}/boards/${id}`)
+            const res = await axios.post(`${CUSTOM_API}/boards`, {mark})
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
 
             const board:Board = res.data.board
             const threads:Thread[] = res.data.threads
-
-            const currentBoard = {
-                id: id,
-                name: board.name,
-                description: board.description || '',
-                mark: board.mark,
-                author: board.author || 'Anonymous',
-                createdAt: board.createdAt || 'N/A'
-            }
             
             result_log = {
                 success: res.data.success,
@@ -98,21 +89,24 @@ const storeBoards = create<Store_Boards>((set, get) => ({
 
             set({
                 log: result_log,
-                currentBoard: currentBoard,
+                currentBoard: board,
                 currentBoardThreads: threads
             })
+            return result_log
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
-            set({
-                error: errorMsg,
-                log: {
+            const Log = {
                     success: false,
                     msg: errorMsg,
                     status: err.response?.status || 500,
                     data: {}
                 }
+            set({
+                error: errorMsg,
+                log: Log
             })
+            return Log
         } finally {
             set({loading: false})
         }

@@ -8,7 +8,7 @@ export const _bio_cont = `flex flex-col gap-2 text-[16px] w-full items-start jus
 //TEXTS
 export const _text = 'text-[#fff7ec] text-wrap'
 export const _text_info = `text-center text-[#7e7e7e]`
-export const _text_loading = `${_text_info} text-3xl`
+export const _text_loading = `${_text_info} text-3xl animate-pulse`
 export const _text_error = `text-[#a52c2c] text-center text-3xl`
 export const _hypertext = `text-purple-500 underline duration-300 transition-all ease-in-out hover:text-fuchsia-400`
 //BUTTONS

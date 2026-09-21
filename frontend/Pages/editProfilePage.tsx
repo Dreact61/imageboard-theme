@@ -10,6 +10,10 @@ export default function EditProfilePage() {
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
     const editUser = storeUsers.getState().editUser
     //STATES
+    const currentName = currentUser?.username
+    const currentDesc = currentUser?.description
+    const currentPassword = currentUser?.password
+
     const [name, setName] = useState('')
     const [desc, setDesc] = useState('')
     const [pass, setPass] = useState('')
@@ -19,16 +23,16 @@ export default function EditProfilePage() {
         setName(currentUser.username)
         setDesc(currentUser.description || '')
         setPass(currentUser.password || '')
-    }, [currentUser])
+    }, [])
     //HANDLERS
     const handleFormSubmission = async (e:React.SubmitEvent) => {
         e.preventDefault()
         if (!currentUser?.id) return
 
         const data = {
-            username: name || null,
-            description: desc || null,
-            password: pass || null,
+            username: name !== currentName ? name : null,
+            description: desc !== currentDesc ? desc : null,
+            password: pass !== currentPassword ? pass : null,
             id: currentUser.id
         }
 
@@ -65,12 +69,12 @@ export default function EditProfilePage() {
                     <label htmlFor="desc">Описание</label>
                     <textarea id="desc" className={_textareaField} value={desc} onChange={(e) => setDesc(e.target.value)} />
                     <label htmlFor="pass">Пароль</label>
-                    <input type="password" id="pass" className={_inputField} value={pass} onChange={(e) => setPass(e.target.value)} />
+                    <input type="password" id="pass" className={_inputField} value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Введите новый пароль" />
                 </section>
 
                 <section className={_button_cont}>
                     <button type="submit" className={_button}>Подтвердить</button>
-                    <button type="button" onClick={() => navigate('/my-ptofile')} className={_button}>Назад</button>
+                    <button type="button" onClick={() => navigate('/my-profile')} className={_button}>Назад</button>
                 </section>
             </form>
         </div>
