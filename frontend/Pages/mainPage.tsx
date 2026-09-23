@@ -15,8 +15,12 @@ export default function MainPage() {
     const loading = useSyncExternalStore(storeBoards.subscribe, () => storeBoards.getState().loading, () => false)
 
     useEffect(() => {
-        if (allBoards.length === 0) fetchAllBoards()
-    }, [allBoards.length, fetchAllBoards])
+        const handleAsyncParse = async () => {
+            if (allBoards.length === 0) await fetchAllBoards()
+            }
+        handleAsyncParse()
+    }, [])
+    console.log()
 
     let mainContent:any
     if (loading) {
@@ -43,9 +47,9 @@ export default function MainPage() {
                 <div className={_container}>
                     {allBoards && allBoards.length > 0
                     ? allBoards.map(board => (
-                        <div className={_card}>
+                        <div key={board.id} className={_card}>
                             <strong>{board.name} - ({board.mark})</strong>
-                            <p>{board.description}</p>
+                            <p>{board.description ? board.description : 'Нет описания.'}</p>
                             <small>Автор: {board.author}</small>
                             <small>Создано {board.createdAt?.toLocaleString()}</small>
                         </div>

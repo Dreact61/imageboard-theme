@@ -4,7 +4,7 @@ import { _body, _main, _text_error, _text_info, _text_loading } from "../style-p
 
 import storeBoards from "../Stores/boardsStore"
 import { useSyncExternalStore, useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router"
+import { useParams, useNavigate, Link } from "react-router"
 
 export default function BoardPage() {
     //NAVIGATION && PARAMS
@@ -55,7 +55,7 @@ export default function BoardPage() {
             <Header />
 
             <section className={_main}>
-                <strong>{currentBoard.name} ({currentBoard.mark})</strong>
+                <strong><Link to={`/boards/${board_mark}`}>{currentBoard.name}</Link> ({currentBoard.mark})</strong>
                 <p>{currentBoard.description}</p>
                 <small>Создано {currentBoard.author} в {currentBoard.createdAt}</small>   
             </section>
