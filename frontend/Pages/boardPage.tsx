@@ -1,6 +1,6 @@
 import Header from "../Parts/header"
 import Footer from "../Parts/footer"
-import { _body, _main, _text_error, _text_info, _text_loading } from "../style-presets"
+import { _body, _button, _button_cont, _card, _main, _section, _text_error, _text_info, _text_loading } from "../style-presets"
 
 import storeBoards from "../Stores/boardsStore"
 import { useSyncExternalStore, useEffect, useState } from "react"
@@ -37,6 +37,7 @@ export default function BoardPage() {
         }
         handleAsyncParse()
     }, [fetchThisBoard])
+    //RENDER
     let mainContent:any
     if (loading || isFetching) {
         mainContent = 
@@ -54,11 +55,34 @@ export default function BoardPage() {
         <div className={_body}>
             <Header />
 
-            <section className={_main}>
-                <strong><Link to={`/boards/${board_mark}`}>{currentBoard.name}</Link> ({currentBoard.mark})</strong>
-                <p>{currentBoard.description}</p>
-                <small>Создано {currentBoard.author} в {currentBoard.createdAt}</small>   
-            </section>
+            <main className={_main}>
+                <section className={_section}>
+                    <strong>{currentBoard.name} ({currentBoard.mark})</strong>
+                    <p className="text-[18px]">{currentBoard.description}</p>
+                    <small className={`${_text_info} text-[16px]`}>Автор:{currentBoard.author}</small>
+                    <small className={`${_text_info} text-[16px]`}>Время создания: {currentBoard.createdAt}</small>   
+                </section>
+
+                <section className={_section}>
+                    <strong className="text-center border-2-b w-full">Треды доски</strong>
+                    {currentBoardThreads && currentBoardThreads.length !== 0
+                    ? currentBoardThreads.map(thread => (
+                        <div className={_card} key={thread.id}>
+                            <strong><Link to={`boards/${board_mark}/threads/${thread.id}`}>{thread.name}</Link></strong>
+                            <i>{thread.description ? thread.description : 'Нет описания.'}</i>
+                            <small className={_text_info}>Автор: {thread.author || 'Аноним'}</small>
+                            <small className={_text_info}>Создано {thread.createdAt}</small>
+                        </div>
+                    ))
+                    : <p className={_text_info}>У этой доски пока нет тредов.</p>
+                    }
+                </section>
+
+                <section className={_button_cont}>
+                    <button type="button" onClick={() => navigate(`/boards/${board_mark}/threads/create`)} className={_button}>Создать тред</button>
+                    <button type="button" onClick={() => navigate('/')} className={_button}>Назад</button>
+                </section>
+            </main>
             <Footer />
         </div>
     }

@@ -1,6 +1,6 @@
 import Header from '../Parts/header'
 import Footer from '../Parts/footer'
-import { _body, _borders, _button, _button_cont, _card, _container, _text_error, _text_info, _text_loading } from '../style-presets'
+import { _body, _borders, _button, _button_cont, _card, _container, _hypertext, _text_error, _text_info, _text_loading } from '../style-presets'
 
 import storeBoards from '../Stores/boardsStore'
 
@@ -20,7 +20,7 @@ export default function MainPage() {
             }
         handleAsyncParse()
     }, [])
-    console.log()
+    console.log(allBoards)
 
     let mainContent:any
     if (loading) {
@@ -44,14 +44,14 @@ export default function MainPage() {
             <main className={`flex flex-col justify-center items-center m-auto p-2 border w-1/2 mt-5 ${_borders}`}>
                 <h2>Доступные доски</h2>
                 
-                <div className={_container}>
+                <div className={`${_container} gap-4`}>
                     {allBoards && allBoards.length > 0
                     ? allBoards.map(board => (
                         <div key={board.id} className={_card}>
-                            <strong>{board.name} - ({board.mark})</strong>
-                            <p>{board.description ? board.description : 'Нет описания.'}</p>
-                            <small>Автор: {board.author}</small>
-                            <small>Создано {board.createdAt?.toLocaleString()}</small>
+                            <strong><Link className={_hypertext} to={`boards/${board.mark}`}>{board.name}</Link> - (/{board.mark}/)</strong>
+                            <i>{board.description ? board.description : 'Нет описания.'}</i>
+                            <small className={_text_info}>Автор: {board.author}</small>
+                            <small className={_text_info}>Создано {board.createdAt?.toLocaleString()}</small>
                         </div>
                     ))
                     : <p className={_text_info}>Досок пока нет.</p>

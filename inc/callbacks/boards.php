@@ -49,9 +49,21 @@
             'post_status' => 'publish'
         ]);
 
+        $formatted_boards = [];
+        foreach($boards as $board) {
+            $formatted_boards[] = [
+                'id' => $board->ID,
+                'name' => $board->post_title,
+                'description' => get_post_meta($board->ID, 'board_description', true),
+                'mark' => get_post_meta($board->ID, 'board_mark', true),
+                'author' => get_post_meta($board->ID, 'board_author', true),
+                'createdAt' => $board->post_date
+            ];
+        }
+
         return new WP_REST_Response([
             'success' => true,
-            'boards' => $boards
+            'boards' => $formatted_boards
         ]);
     }
 

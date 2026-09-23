@@ -21,7 +21,7 @@ export const _profiles_btn = `${_button} w-full text-center`
 export const _inputField = `w-full px-4 py-2 border-2 rounded-md border-[#3f2b8a] bg-[#07091a]/60 text-[#fff7ec] placeholder:text-[#fff7ec]/40 focus:outline-none focus:border-[#5a3ec4] focus:shadow-[0_0_10px_rgba(90,62,196,0.3)] transition-all duration-300`
 export const _textareaField = `${_inputField} resize-none h-25`
 //CONTAINERS
-export const _card = `${_borders} p-5 bg-[#382772]/20 backdrop-blur-sm shadow-[0_4px_20px_rgba(0,0,0,0.5)] w-full`
+export const _card = `${_borders} text-center flex flex-col p-5 bg-[#382772]/20 backdrop-blur-sm shadow-[0_4px_20px_rgba(0,0,0,0.5)] w-full`
 export const _container = `${_borders} flex flex-col border p-2 px-2 m-2 w-full`
 //GRID ELEMENTS
 export const _list_grid = `${_borders} grid grid-cols-4 gap-1 py-2 w-full text-center bg-none`

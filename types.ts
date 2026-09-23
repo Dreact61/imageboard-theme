@@ -55,9 +55,9 @@ export type Thread = {
     name: string,
     description?: string,
     parent: string, // mark
-    author?: string | number | null,
-    createdAt?: Date | string,
-    status: 'PRIVATE' | 'PUBLIC'
+    author?: string | null,
+    createdAt?: string,
+    status: string
 }
 
 export type Store_Threads = {
@@ -66,8 +66,8 @@ export type Store_Threads = {
     log: Log | null,
     currentThread: Thread | null,
     currentThreadPosts: Post[],
-    fetchThisThread: (id:number) => Promise<void>,
-    createNewThread: (data:Thread) => Promise<void>,
+    fetchThisThread: (id:number) => Promise<Log>,
+    createNewThread: (data:Thread) => Promise<Log>,
     editThread: (id: number, data: Thread) => Promise<void>,
     deleteThread: (id: number) => Promise<void>
 }
@@ -80,7 +80,7 @@ export type Post = {
     id?: number,
     content: string,
     author: string | 'Anonymous',
-    createdAt?: Date,
+    createdAt?: string,
     parent: number // Thread.id
 }
 
@@ -99,7 +99,8 @@ export type Log = {
     success: boolean,
     msg?: string | null,
     status: number,
-    data?: unknown | null
+    data?: unknown | null,
+    id?: number | undefined
 }
 
 export type logFetchingFilters = {

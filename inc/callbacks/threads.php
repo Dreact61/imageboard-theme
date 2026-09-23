@@ -6,7 +6,7 @@
         $author = $params['author'];
         $name = $params['name'];
         $description = $params['description'] ?? '';
-        $status = strtoupper($params['status']) ?? 'PUBLIC';
+        $status = strtoupper($params['status']);
 
         $board_posts = get_posts([
             'post_type' => 'board',
@@ -58,7 +58,8 @@
         $id = $request->get_param('id');
 
         $post = get_posts([
-            'include' => $id,
+            'ID' => $id,
+            'posts_per_page' => 1,
             'post_type' => 'thread',
             'post_status' => 'publish',
         ]);
