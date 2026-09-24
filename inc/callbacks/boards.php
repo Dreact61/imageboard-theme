@@ -1,5 +1,9 @@
 <?php
     function register_boards_api(WP_REST_Request $request) {
+        if (!function_exists('post_exists')) {
+            require_once ABSPATH . 'wp-admin/includes/post.php';
+        }
+
         $params = $request->get_json_params();
         
         $name = $params['name'];
@@ -8,6 +12,25 @@
         $author = $params['author'];
         $author_id = get_current_user_id();
         $mark = $params['mark'];
+
+        $mark_exists = get_posts([
+            'post_type' => 'board',
+            'posts_per_page' => 1,
+            'post_status' => 'publish',
+            'meta_query' => [
+                [
+                    'key' => 'board_mark',
+                    'value' => $mark
+                ],
+            ]
+        ]);
+
+        if (!empty($mark_exists)) {
+            return new WP_Error("object_exists", "метка /$mark/ уже занята.", ["status" => 400, "success" => false]);
+        }
+        if (post_exists($name, '', '', 'board', 'publish')) {
+            return new WP_Error("object_exists", "имя /$name/ уже занято.", ["status" => 400, "success" => false]);
+        }
 
         $post_id = wp_insert_post([
             'post_type' => 'board',
@@ -49,9 +72,21 @@
             'post_status' => 'publish'
         ]);
 
+        $formatted_boards = [];
+        foreach($boards as $board) {
+            $formatted_boards[] = [
+                'id' => $board->ID,
+                'name' => $board->post_title,
+                'description' => get_post_meta($board->ID, 'board_description', true),
+                'mark' => get_post_meta($board->ID, 'board_mark', true),
+                'author' => get_post_meta($board->ID, 'board_author', true),
+                'createdAt' => $board->post_date
+            ];
+        }
+
         return new WP_REST_Response([
             'success' => true,
-            'boards' => $boards
+            'boards' => $formatted_boards
         ]);
     }
 
@@ -180,7 +215,7 @@
 
     function delete_current_board_api(WP_REST_Request $request) {
         $id = $request->get_param('id');
-        
+
         $mark = get_post_meta($id, 'board_mark', true);
 
         $relative_threads = get_posts([
@@ -209,8 +244,7 @@
         $post_id = get_posts([
             'posts_per_page' => 1,
             'post_type' => 'board',
-            'meta_key' => 'board_mark',
-            'meta_value' => $mark,
+            'ID' => $id,
             'post_status' => 'publish'
         ]);
         $board_id = $post_id[0]->ID;

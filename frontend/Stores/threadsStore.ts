@@ -23,21 +23,14 @@ const storeThreads = create<Store_Threads>((set, get) => ({
     fetchThisThread: async (id) => {
         try {
             set({error: null, loading: true, log: null})
-            let result_log = {
-                success: false,
-                msg: '',
-                status: 0,
-                data: {}
-            }
 
-            const res = await axios.get(`${CUSTOM_API}/threads/${id}`)
+            const res = await axios.post(`${CUSTOM_API}/threads`, {id})
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
             const thread:Thread = res.data.thread
             const posts = res.data.posts
-            if (thread.createdAt instanceof Date) thread.createdAt = thread.createdAt.toISOString()
 
-            result_log = {
+            let result_log = {
                 success: res.data.success,
                 msg: 'Тред успешно загружен',
                 status: res.status,
@@ -49,18 +42,21 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 currentThreadPosts: posts,
                 log: result_log
             })
+            return result_log
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
-            set({
-                error: errorMsg,
-                log: {
+            const Log = {
                     success: false,
                     msg: errorMsg,
                     status: err.response?.status || 500,
                     data: {}
                 }
-            })
+                set({
+                    error: errorMsg,
+                    log: Log
+                })
+                return Log
         } finally {
             set({loading:false})
         }
@@ -69,12 +65,6 @@ const storeThreads = create<Store_Threads>((set, get) => ({
     createNewThread: async (data) => {
         try {
             set({error: null, loading: true, log: null})
-            let result_log = {
-                success: false,
-                msg: '',
-                status: 0,
-                data: {}
-            }
 
             const newThread:Thread = {
                 name: data.name,
@@ -87,7 +77,7 @@ const storeThreads = create<Store_Threads>((set, get) => ({
             const res = await axios.post(`${CUSTOM_API}/threads/create`, newThread, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
-            const thread:Thread = res.data.thread
+            const thread:Thread = res.data.thread_data
 
             const createdThread:Thread = {
                 id: thread.id,
@@ -99,28 +89,32 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 status: thread.status
             }
 
-            result_log = {
+            let result_log = {
                 success: res.data.success,
                 msg: 'Тред успешно создан!',
                 status: res.status,
-                data: createdThread
+                data: createdThread,
+                id: createdThread.id
             }
 
             set({
                 log: result_log
             })
+            return result_log
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
-            set({
-                error: errorMsg,
-                log: {
+            const Log = {
                     success: false,
                     msg: errorMsg,
                     status: err.response?.status || 500,
                     data: {}
                 }
+            set({
+                error: errorMsg,
+                log: Log
             })
+            return Log
         } finally {
             set({loading:false})
         }

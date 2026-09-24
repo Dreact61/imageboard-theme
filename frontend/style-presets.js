@@ -21,8 +21,9 @@ export const _profiles_btn = `${_button} w-full text-center`
 export const _inputField = `w-full px-4 py-2 border-2 rounded-md border-[#3f2b8a] bg-[#07091a]/60 text-[#fff7ec] placeholder:text-[#fff7ec]/40 focus:outline-none focus:border-[#5a3ec4] focus:shadow-[0_0_10px_rgba(90,62,196,0.3)] transition-all duration-300`
 export const _textareaField = `${_inputField} resize-none h-25`
 //CONTAINERS
-export const _card = `${_borders} p-5 bg-[#382772]/20 backdrop-blur-sm shadow-[0_4px_20px_rgba(0,0,0,0.5)] w-full`
-export const _container = `${_borders} flex flex-col border p-2 px-2 m-2 w-full`
+export const _card = `${_borders} text-center flex flex-col p-5 bg-[#382772]/20 backdrop-blur-sm shadow-[0_4px_20px_rgba(0,0,0,0.5)] w-full`
+export const _container = `${_borders} flex flex-col border p-2 gap-4 px-2 m-2 w-full`
+export const _card_threads = `${_card} `
 //GRID ELEMENTS
 export const _list_grid = `${_borders} grid grid-cols-4 gap-1 py-2 w-full text-center bg-none`
 export const _form_items_grid = `${_borders} grid grid-cols-2 gap-1 p-2 m-5 w-full font-semibold items-center justify-content text-center bg-none`
@@ -32,6 +33,6 @@ export const _footer = `${_borders} flex flex-col border-2 w-full mt-auto mt-4 p
 //MAIN ELEMENTS
 export const _main = `flex flex-col justify-center items-center p-6 border w-1/2 ${_borders}`
 export const _section = `flex flex-col text-2xl w-full text-center justify-center items-center py-2 mb-5 border-b-2 ${_borders}`
-export const _body = `${_text} flex flex-col absolute left-0 top-0 items-center justify-around w-screen min-h-screen bg-[#07091a] p-5`
+export const _body = `${_text} flex flex-col gap-8 absolute left-0 top-0 items-center justify-around w-screen min-h-screen bg-[#07091a] p-5`
 
 export const _profiles_body = `${_body} justify-center gap-5`

@@ -61,6 +61,7 @@ function mw_is_board_owner(WP_REST_Request $req) {
     if (is_wp_error($is_auth)) {
         return $is_auth;
     }
+    mw_determine_user_from_jwt(get_current_user_id());
 
     $board_author = get_post_meta(absint($req->get_param('id')), 'board_author', true);
     $username = get_userdata(get_current_user_id())->user_login;

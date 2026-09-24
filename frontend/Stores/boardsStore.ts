@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios, {AxiosRequestConfig} from "axios";
-import type {Board, Store_Boards, Thread} from "../../types";
+import type {Board, BoardRequest, Store_Boards, Thread} from "../../types";
 
 const CUSTOM_API = process.env.CUSTOM_API
 
@@ -24,28 +24,34 @@ const storeBoards = create<Store_Boards>((set, get) => ({
     fetchAllBoards: async () => {
         try{
             set({loading: true, error: null, log: null})
-            let result_log = {
-                success: false,
-                msg: '',
-                status: 0,
-                data: {}
-            }
 
             const res = await axios.get(`${CUSTOM_API}/boards/all`)
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
 
             const boards:Board[] = res.data.boards
 
-            result_log = {
+            const result_log = {
                 success: res.data.success,
                 msg: 'Доска успешно загружена!',
-                status: res.status,
-                data: boards
+                status: res.status
             }
+
+            const data:Board[] = []
+            boards.forEach((board:Board) => {
+                console.log(board)
+                data.push({
+                    id: board.id,
+                    name: board.name,
+                    description: board.description,
+                    mark: board.mark,
+                    author: board.author,
+                    createdAt: board.createdAt
+                })
+            })
 
             set({
                 log: result_log,
-                allBoards: boards
+                allBoards: data
             })
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
@@ -84,12 +90,12 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 success: res.data.success,
                 msg: 'Доска успешно загружена!',
                 status: res.status,
-                data: board
+                data: board as Board
             }
 
             set({
                 log: result_log,
-                currentBoard: board,
+                currentBoard: board as Board,
                 currentBoardThreads: threads
             })
             return result_log
@@ -172,14 +178,14 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 data: {}
             }
 
-            const dataToEdit:Board = {
+            const dataToEdit:BoardRequest = {
                 id: id,
                 name: data.name,
-                mark: data.mark,
-                description: data.description
+                description: data.description,
+                mark: data.mark
             }
 
-            const res = await axios.put(`${CUSTOM_API}/boards/${id}`, dataToEdit, getAxiosConfig())
+            const res = await axios.put(`${CUSTOM_API}/boards/edit`, dataToEdit, getAxiosConfig())
             if (!res.data?.success) {
                 throw new Error(res.data?.message || 'Не удалось изменить доску')
             }
@@ -206,59 +212,60 @@ const storeBoards = create<Store_Boards>((set, get) => ({
                 set({currentBoard: board})
             }
             set({log: result_log})
+            return result_log
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
-            set({
-                error: errorMsg,
-                log: {
+            const Log = {
                     success: false,
                     msg: errorMsg,
                     status: err.response?.status || 500,
                     data: {}
                 }
+            set({
+                error: errorMsg,
+                log: Log
             })
+            return Log
         } finally {
             set({loading: false})
         }
     },
     
-    deleteBoard: async (mark) => {
+    deleteBoard: async (id) => {
         try {
             set({loading: true, error: null, log: null})
-            let result_log = {
-                success: false,
-                msg: '',
-                status: 0,
-                data: 0
-            }
 
-            const res = await axios.delete(`${CUSTOM_API}/boards/${mark}/delete`, getAxiosConfig())
+            const res = await axios.post(`${CUSTOM_API}/boards/delete`, {id}, getAxiosConfig())
             if (!res.data?.success) {
                 throw new Error(res.data?.message || 'Не удалось удалить доску')
             }
 
-            result_log = {
+            let result_log = {
                 success: res.data.success,
                 msg: 'Доска успешно удалена',
                 status: res.status,
-                data: res.data.id
+                data: id
             }
             const {currentBoard} = get()
             if (currentBoard && currentBoard.id === res.data.id) set({currentBoard: null, currentBoardThreads: []})
             set({log: result_log})
+
+            return result_log
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
-            set({
-                error: errorMsg,
-                log: {
+            const Log = {
                     success: false,
                     msg: errorMsg,
                     status: err.response?.status || 500,
                     data: {}
                 }
+            set({
+                error: errorMsg,
+                log: Log
             })
+            return Log
         } finally {
             set({loading: false})
         }

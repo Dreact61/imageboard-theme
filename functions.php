@@ -45,4 +45,23 @@ add_filter('allowed_redirect_hosts', function($hosts) {
     $hosts[] = 'localhost:8080';
     return $hosts;
 });
+
+//-----
+
+// function single_time_delete_all_cpt_boards() {
+//     $boards = get_posts(array(
+//         'post_type'   => 'board', 
+//         'numberposts' => -1,
+//         'post_status' => 'any'
+//     ));
+
+//     if (!empty($boards)) {
+//         foreach ($boards as $board) {
+//             wp_delete_post($board->ID, true); 
+//         }
+//         error_log('БАЗА ДАННЫХ: Все кастомные записи досок удалены.');
+//     }
+// }
+// add_action('init', 'single_time_delete_all_cpt_boards');
+
 ?>

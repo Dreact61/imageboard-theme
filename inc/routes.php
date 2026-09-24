@@ -242,7 +242,7 @@
     }); 
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/boards/(?P<mark>[a-zA-Z0-9]+)/edit", [
+        register_rest_route('myapi/v1', "/boards/edit", [
             'methods' => 'PUT',
             'callback' => 'edit_current_board_api',
             'permission_callback' => 'mw_is_board_owner',
@@ -284,8 +284,8 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', '/boards/(?P<id>\d+)/delete', [
-            'methods' => 'DELETE',
+        register_rest_route('myapi/v1', '/boards/delete', [
+            'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'delete_current_board_api',
             'permission_callback' => function(WP_REST_Request $req) {
                 $is_admin = mw_is_admin($req);
@@ -301,7 +301,7 @@
                     'required' => true,
                     'sanitize_callback' => 'absint',
                     'validate_callback' => function($param) {
-                        return is_numeric($param);
+                        return is_numeric($param) && $param > 0;
                     }
                 ]
             ]
@@ -313,13 +313,13 @@
     //=========================
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/threads/(?P<parent>[a-zA-Z0-9]\d+)/(?P<id>\d+)", [
-            'methods' => WP_REST_Server::READABLE,
+        register_rest_route('myapi/v1', "/threads", [
+            'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'fetch_current_thread_api',
             'permission_callback' => '__return_true',
             'args' => [
                 'id' => [
-                    'type' => 'string',
+                    'type' => 'integer',
                     'required' => true,
                     'sanitize_callback' => 'absint',
                     'validate_callback' => function($param) {
@@ -334,14 +334,14 @@
         register_rest_route('myapi/v1', '/threads/create', [
             'methods' => 'POST',
             'callback' => 'imageboard_create_thread',
-            'permission_callback' => 'mw_is_authenticated',
+            'permission_callback' => 'mw_determine_user_from_jwt',
             'args' => [
                 'name' => [
                     'type' => 'string',
                     'required' => true,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_numeric($param);
+                        return is_string($param);
                     }
                 ],
                 'description' => [
@@ -349,7 +349,7 @@
                     'required' => false,
                     'sanitize_callback' => 'sanitize_textarea_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) || is_null($param);
                     }
                 ],
                 'parent' => [
@@ -373,7 +373,7 @@
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) && in_array($param, ['PUBLIC', 'PRIVATE'], true);
                     }
                 ],
             ],
