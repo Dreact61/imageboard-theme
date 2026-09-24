@@ -32,6 +32,13 @@ export type Board = {
     createdAt?: string
 }
 
+export type BoardRequest = {
+    name: string | null,
+    description: string | null,
+    mark: string | null,
+    id?: number
+}
+
 export type Store_Boards = {
     error: string | null,
     loading: boolean,
@@ -42,8 +49,8 @@ export type Store_Boards = {
     fetchAllBoards: () => Promise<void>,
     fetchThisBoard: (mark: string) => Promise<Log>,
     createNewBoard: (data:Board) => Promise<Log>,
-    editBoard: (id: number, data: Board) => Promise<void>,
-    deleteBoard: (id: number) => Promise<void>
+    editBoard: (id: number, data: BoardRequest) => Promise<Log>,
+    deleteBoard: (id: number) => Promise<Log>
 }
 
 //=========================

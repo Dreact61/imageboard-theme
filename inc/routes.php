@@ -285,7 +285,7 @@
 
     add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', '/boards/delete', [
-            'methods' => 'DELETE',
+            'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'delete_current_board_api',
             'permission_callback' => function(WP_REST_Request $req) {
                 $is_admin = mw_is_admin($req);
@@ -301,7 +301,7 @@
                     'required' => true,
                     'sanitize_callback' => 'absint',
                     'validate_callback' => function($param) {
-                        return is_numeric($param);
+                        return is_numeric($param) && $param > 0;
                     }
                 ]
             ]

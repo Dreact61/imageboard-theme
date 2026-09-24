@@ -14,7 +14,8 @@ module.exports = {
   ],
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'index.js', 
+    filename: 'index.js',
+    publicPath: '/wp-content/themes/imageboard-theme/build',
     clean: true
   },
   mode: 'development',

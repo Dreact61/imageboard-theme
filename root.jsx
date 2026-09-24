@@ -12,6 +12,7 @@ import MyProfilePage from "./frontend/Pages/myProfilePage";
 import EditProfilePage from "./frontend/Pages/editProfilePage";
 import ThreadCreationPage from "./frontend/Pages/threadCreationPage";
 import ThreadPage from "./frontend/Pages/threadPage";
+import EditBoardPage from "./frontend/Pages/editBoardPage";
 
 document.addEventListener('DOMContentLoaded', () => {
   createRoot(document.getElementById('root')).render(
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <Route path="/boards/create" element={<BoardCreateionPage/>}></Route>
                 <Route path="/boards/:board_mark" element={<BoardPage/>}></Route>
+                <Route path="/boards/:board_mark/edit" element={<EditBoardPage />}></Route>
 
                 <Route path="/boards/:board_mark/threads/create" element={<ThreadCreationPage />}></Route>
                 <Route path="/boards/:board_mark/threads/:thread_id" element={<ThreadPage />}></Route>
