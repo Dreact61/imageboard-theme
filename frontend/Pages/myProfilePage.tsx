@@ -1,7 +1,7 @@
 import { useSyncExternalStore, useState } from "react"
 import storeUsers from "../Stores/userStore"
-import { _body, _text_error, _text_info, _profiles_body, _section, _main, _bio, _bio_cont, _button, _button_cont, _profiles_btn_cont, _profiles_btn } from "../style-presets"
-import { useNavigate } from "react-router"
+import { _body, _hypertext, _text_error, _text_info, _profiles_body, _section, _main, _bio, _bio_cont, _button, _button_cont, _profiles_btn_cont, _profiles_btn } from "../style-presets"
+import { useNavigate, Link } from "react-router"
 
 export default function MyProfilePage() {
     //NAVIGATION
@@ -51,6 +51,7 @@ export default function MyProfilePage() {
         <div className={_body}>
             <p className={_text_error}>Ошибка 401</p>
             <small className={_text_info}>Вы не авторизованы.</small>
+            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
         </div>
     } else {
         mainContent =

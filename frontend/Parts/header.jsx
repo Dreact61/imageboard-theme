@@ -12,7 +12,7 @@ export default function Header() {
                 <h2 className="text-2xl">D-Chan</h2>
                 <p>{currentUser ? <Link  className={_hypertext} to={`/my-profile`}>{currentUser.username}</Link> : <Link to="/register" className={_hypertext}>Регистрация</Link>}</p>
             </div>
-            <img className={_img} src="../../public/pictures/ico.png" alt="D-ch logo" />
+            <img className={_img} src="/imageboard-theme/public/pictures/ico.png" alt="D-ch logo" />
         </header>
     )
 }

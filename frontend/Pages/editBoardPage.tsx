@@ -73,13 +73,11 @@ export default function EditBoardPage() {
     }
     //RENDER
     if (isFetching) {
-        return (
-            <div className={_body}>
-                <p className={_text_loading}>Загрузка...</p>
-                <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
-            </div>
-        )
-    } 
+        <div className={_body}>
+            <p className={_text_loading}>Загрузка...</p>
+            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+        </div>
+    }
     
     if (error || !board_mark || !currentBoard) {
         return (

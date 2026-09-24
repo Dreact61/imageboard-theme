@@ -1,12 +1,10 @@
-import Header from "../Parts/header"
-import Footer from "../Parts/footer"
-import type { User, Log } from "../../types"
+import type { User } from "../../types"
 
 import { useSyncExternalStore, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 
 import storeUsers from "../Stores/userStore"
-import { _body, _text_loading, _text_error, _text_info, _main, _section, _borders, _bio, _bio_cont, _button_cont, _button, _profiles_body, _profiles_btn_cont, _profiles_btn } from "../style-presets"
+import { _body, _hypertext, _text_loading, _text_error, _text_info, _main, _section, _borders, _bio, _bio_cont, _button_cont, _button, _profiles_body, _profiles_btn_cont, _profiles_btn } from "../style-presets"
 
 export default function ProfilePage() {
     //NAVIGATION && PARAMS
@@ -45,12 +43,14 @@ export default function ProfilePage() {
         mainContent = 
         <div className={_body}>
             <p className={_text_loading}>Загрузка...</p>
+            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
         </div>
     } else if (error || !user) {
         mainContent =
         <div className={_body}>
             <p className={_text_error}>Ошибка {status}</p>
             <small className={_text_info}>{error ? error : 'Что-то пошло не так. Попробуйте перезагрузить страницу или зайти позже.'}</small>
+            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
         </div>
     } else {
         mainContent = 

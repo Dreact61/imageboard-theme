@@ -1,7 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react"
-import { useNavigate } from "react-router"
+import { useNavigate, Link } from "react-router"
 import storeUsers from "../Stores/userStore"
-import { _body, _button, _button_cont, _form_items_grid, _inputField, _main, _section, _text_error, _text_info, _textareaField } from "../style-presets"
+import { _body, _hypertext, _button, _button_cont, _form_items_grid, _inputField, _main, _section, _text_error, _text_info, _textareaField } from "../style-presets"
 
 export default function EditProfilePage() {
     //NAVIGATION
@@ -54,6 +54,7 @@ export default function EditProfilePage() {
         <div className={_body}>
             <p className={_text_error}>Ошибка 401</p>
             <small className={_text_info}>Вы не авторизованы.</small>
+            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
         </div>
     } else {
         mainContent = 

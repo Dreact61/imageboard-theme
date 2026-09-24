@@ -20,7 +20,6 @@ export default function MainPage() {
             }
         handleAsyncParse()
     }, [])
-    console.log(allBoards)
 
     let mainContent:any
     if (loading) {

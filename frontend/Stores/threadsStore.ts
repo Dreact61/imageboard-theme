@@ -123,13 +123,6 @@ const storeThreads = create<Store_Threads>((set, get) => ({
     editThread: async (id, data) => {
         try {
             set({error: null, loading: true, log: null})
-            let result_log = {
-                success: false,
-                msg: '',
-                status: 0,
-                data: {}
-            }
-
             const dataToEdit = {
                 id: id,
                 name: data.name || null,
@@ -152,7 +145,7 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 status: thread.status
             }
 
-            result_log = {
+            let result_log = {
                 success: res.data.success,
                 msg: 'Тред успешно обновлен',
                 status: res.status,
@@ -162,18 +155,21 @@ const storeThreads = create<Store_Threads>((set, get) => ({
             const {currentThread} = get()
             if(currentThread && currentThread.id === editedThread.id) set({currentThread: editedThread})
             set({log: result_log})
+            return result_log
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
-            set({
-                error: errorMsg,
-                log: {
+            const Log = {
                     success: false,
                     msg: errorMsg,
                     status: err.response?.status || 500,
                     data: {}
                 }
+            set({
+                error: errorMsg,
+                log: Log
             })
+            return Log
         } finally {
             set({loading:false})
         }
@@ -182,19 +178,12 @@ const storeThreads = create<Store_Threads>((set, get) => ({
     deleteThread: async (id) => {
         try {
             set({error: null, loading: true, log: null})
-            let result_log = {
-                success: false,
-                msg: '',
-                status: 0,
-                data: {}
-            }
-
-            const res = await axios.delete(`${CUSTOM_API}/threads/${id}`, getAxiosConfig())
+            const res = await axios.post(`${CUSTOM_API}/threads/delete`, {id}, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
             const thread = res.data.thread_id
 
-            result_log = {
+            return {
                 success: res.data.success,
                 msg: 'Тред успешно удален',
                 status: res.status,
@@ -203,15 +192,16 @@ const storeThreads = create<Store_Threads>((set, get) => ({
         } catch(err:any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
-            set({
-                error: errorMsg,
-                log: {
+            const Log = {
                     success: false,
                     msg: errorMsg,
                     status: err.response?.status || 500,
-                    data: {}
                 }
+            set({
+                error: errorMsg,
+                log: Log
             })
+            return Log
         } finally {
             set({loading:false})
         }

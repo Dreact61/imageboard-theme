@@ -67,6 +67,13 @@ export type Thread = {
     status: string
 }
 
+export type ThreadRequest = {
+    name: string,
+    description: string,
+    status: string,
+    id?:number
+}
+
 export type Store_Threads = {
     error: string | null,
     loading: boolean,
@@ -75,8 +82,8 @@ export type Store_Threads = {
     currentThreadPosts: Post[],
     fetchThisThread: (id:number) => Promise<Log>,
     createNewThread: (data:Thread) => Promise<Log>,
-    editThread: (id: number, data: Thread) => Promise<void>,
-    deleteThread: (id: number) => Promise<void>
+    editThread: (id: number, data: ThreadRequest) => Promise<Log>,
+    deleteThread: (id: number) => Promise<Log>
 }
 
 //=========================

@@ -381,7 +381,7 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/threads/(?P<id>\d+)/edit", [
+        register_rest_route('myapi/v1', "/threads/edit", [
             'methods' => 'PUT',
             'callback' => 'edit_current_thread_api',
             'permission_callback' => 'mw_is_thread_owner',
@@ -424,8 +424,8 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/threads/(?P<id>\d+)/delete", [
-            'methods' => 'DELETE',
+        register_rest_route('myapi/v1', "/threads/delete", [
+            'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'delete_current_thread_api',
             'permission_callback' => function(WP_REST_Request $req) {
                 $is_admin = mw_is_admin($req);
@@ -446,7 +446,7 @@
                     'required' => true,
                     'sanitize_callback' => 'absint',
                     'validate_callback' => function ($param) {
-                        return is_numeric($param);
+                        return is_numeric($param) && $param > 0;
                     }
                 ]
             ]

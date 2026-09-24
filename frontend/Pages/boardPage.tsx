@@ -77,7 +77,6 @@ export default function BoardPage() {
                 <p className={_text_error}>Ошибка {status}</p>
                 <small className={_text_info}>{error || msg || 'Перепроверьте адрес. Возможно вы написали его с ошибкой.'}</small>
                 <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
-                <button onClick={handleBoardDeletion} className={_button}>ss</button>
             </div>
     } else {
         mainContent =
@@ -97,7 +96,7 @@ export default function BoardPage() {
                         {currentBoardThreads && currentBoardThreads.length !== 0
                             ? currentBoardThreads.map(thread => (
                                 <div className={_card} key={thread.id}>
-                                    <strong><Link className={_hypertext} to={`boards/${board_mark}/threads/${thread.id}`}>{thread.name}</Link></strong>
+                                    <strong><Link className={_hypertext} to={`/boards/${board_mark}/threads/${thread.id}`}>{thread.name}</Link></strong>
                                     <i>{thread.description ? thread.description : 'Нет описания.'}</i>
                                     <small className={_text_info}>Автор: {thread.author || 'Аноним'}</small>
                                     <small className={_text_info}>Создано {thread.createdAt}</small>

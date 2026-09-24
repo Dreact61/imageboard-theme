@@ -38,7 +38,6 @@ const storeBoards = create<Store_Boards>((set, get) => ({
 
             const data:Board[] = []
             boards.forEach((board:Board) => {
-                console.log(board)
                 data.push({
                     id: board.id,
                     name: board.name,
