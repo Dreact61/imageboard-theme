@@ -64,14 +64,15 @@ export type Thread = {
     parent: string, // mark
     author?: string | null,
     createdAt?: string,
-    status: string
+    status: string,
+    password?: string
 }
 
 export type ThreadRequest = {
     name: string,
     description: string,
-    status: string,
-    id?:number
+    id?:number,
+    password?: string | null
 }
 
 export type Store_Threads = {

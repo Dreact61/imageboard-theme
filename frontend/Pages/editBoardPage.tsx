@@ -2,6 +2,7 @@ import { useNavigate, useParams, Link } from "react-router";
 import { _body, _main, _text_error, _text_info, _text_loading, _hypertext, _section, _button_cont, _form_items_grid, _profiles_body, _button, _inputField, _textareaField } from "../style-presets";
 import storeBoards from "../Stores/boardsStore";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import storeUsers from "../Stores/userStore";
 
 export default function EditBoardPage() {
     //NAVIGATION && PARAMS
@@ -13,6 +14,8 @@ export default function EditBoardPage() {
     const currentBoard = useSyncExternalStore(storeBoards.subscribe, () => storeBoards.getState().currentBoard, () => null)
     const error = useSyncExternalStore(storeBoards.subscribe, () => storeBoards.getState().error, () => null)
     const loading = useSyncExternalStore(storeBoards.subscribe, () => storeBoards.getState().loading, () => false)
+
+    const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
 
     const currentBoardName = currentBoard?.name
     const currentBoardDesc = currentBoard?.description
@@ -84,6 +87,16 @@ export default function EditBoardPage() {
             <div className={_body}>
                 <p className={_text_error}>Ошибка {status}</p>
                 <small className={_text_info}>{error || msg || 'Перепроверьте адрес. Возможно вы написали его с ошибкой.'}</small>
+                <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+            </div>
+        )
+    }
+
+    if (!currentUser || currentUser.role !== 'admin' || currentBoard?.author !== currentUser.username) {
+        return (
+            <div className={_body}>
+                <p className={_text_error}>Отказано в доступе.</p>
+                <small className={_text_info}>{error || msg || 'У вас недостаточно прав на выполнение этой операции.'}</small>
                 <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
             </div>
         )

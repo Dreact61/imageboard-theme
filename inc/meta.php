@@ -84,6 +84,16 @@
             },
         ]);
 
+        register_post_meta('thread', 'thread_password', [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => function() {
+                return true;
+            }
+        ]);
+
     //================================================
     // POSTS
     //================================================

@@ -71,7 +71,8 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 parent: data.parent,
                 description: data.description,
                 status: data.status || 'PUBLIC',
-                author: data.author
+                author: data.author,
+                password: data.status === 'PRIVATE' ? data.password : ''
             }
 
             const res = await axios.post(`${CUSTOM_API}/threads/create`, newThread, getAxiosConfig())
@@ -86,7 +87,8 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 parent: thread.parent,
                 author: thread.author,
                 createdAt: thread.createdAt,
-                status: thread.status
+                status: thread.status,
+                password: thread.password
             }
 
             let result_log = {
@@ -127,10 +129,10 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 id: id,
                 name: data.name || null,
                 description: data.description || null,
-                status: data.status || null
+                password: data.password || null
             }
 
-            const res = await axios.put(`${CUSTOM_API}/threads/`, dataToEdit, getAxiosConfig())
+            const res = await axios.put(`${CUSTOM_API}/threads/edit`, dataToEdit, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
             const thread:Thread = res.data.thread
@@ -142,7 +144,8 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 parent: thread.parent,
                 author: thread.author,
                 createdAt: thread.createdAt,
-                status: thread.status
+                status: thread.status,
+                password: thread.password
             }
 
             let result_log = {

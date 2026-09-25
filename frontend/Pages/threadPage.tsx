@@ -59,13 +59,13 @@ export default function ThreadPage() {
             const log = await deleteThread(boardId)
 
             if (log.success) {
-                alert('Доска была успешно удалена.')
+                alert('Тред был успешно удален.')
                 navigate('/')
             } else {
-                alert(log.msg || 'Что-то пошло не так при удалении доски.')
+                alert(log.msg || 'Что-то пошло не так при удалении треда.')
             }
         } else {
-            alert('Вы уверены в том, что хотите удалить доску? (Нажмите повторно для подтверждения).')
+            alert('Вы уверены в том, что хотите удалить тред? (Нажмите повторно для подтверждения).')
             setToDelete(true)
         }
         return

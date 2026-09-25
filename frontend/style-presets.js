@@ -23,6 +23,8 @@ export const _textareaField = `${_inputField} resize-none h-25`
 //CONTAINERS
 export const _card = `${_borders} text-center flex flex-col p-5 bg-[#382772]/20 backdrop-blur-sm shadow-[0_4px_20px_rgba(0,0,0,0.5)] w-full`
 export const _container = `${_borders} flex flex-col border p-2 gap-4 px-2 m-2 w-full`
+
+export const _selectCard = `${_card} cursor-pointer rounded-md border-[#3f2b8a] bg-[#382772] text-[#fff7ec] hover:bg-[#3f2b8a] hover:border-[#5a3ec4] hover:shadow-[0_0_15px_rgba(90,62,196,0.5)] transition-all duration-300 ease-in-out`
 //GRID ELEMENTS
 export const _list_grid = `${_borders} grid grid-cols-4 gap-1 py-2 w-full text-center bg-none`
 export const _form_items_grid = `${_borders} grid grid-cols-2 gap-1 p-2 m-5 w-full font-semibold items-center justify-content text-center bg-none`

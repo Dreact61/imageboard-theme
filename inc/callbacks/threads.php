@@ -7,6 +7,7 @@
         $name = $params['name'];
         $description = $params['description'] ?? '';
         $status = strtoupper($params['status']);
+        $password = $status === 'PRIVATE' ? $params['password'] : null;
 
         $board_posts = get_posts([
             'post_type' => 'board',
@@ -30,7 +31,8 @@
                 'board_mark' => $board_mark,
                 'thread_description' => $description,
                 'thread_status' => $status,
-                'thread_author' => $author
+                'thread_author' => $author,
+                'thread_password' => $password ?? ''
             ],
         ]);
 
@@ -46,6 +48,7 @@
             'author' => $author,
             'createdAt' => get_the_date('Y-m-d H:i:s', $post),
             'status' => $status,
+            'password' => $password
         ];
 
         return new WP_REST_Response([
@@ -75,7 +78,8 @@
             'parent' => get_post_meta($thread->ID, 'board_mark', true),
             'author' => get_post_meta($thread->ID, 'thread_author', true),
             'createdAt' => $thread->post_date,
-            'status' => get_post_meta($thread->ID, 'thread_status', true)
+            'status' => get_post_meta($thread->ID, 'thread_status', true),
+            'password' => get_post_meta($thread->ID, 'thread_password', true)
         ];
 
         $relative_posts = get_posts([
@@ -122,13 +126,18 @@
 
         $current_name = $thread->post_title;
         $current_desc = get_post_meta($thread->ID, 'thread_description', true);
-        $current_status = get_post_meta($thread->ID, 'thread_status', true);
+        $status = get_post_meta($thread->ID, 'thread_status', true);
+        $current_pass = get_post_meta($thread->ID, 'thread_password', true);
 
         $new_name = trim($params['name']) ?? $current_name;
         $new_desc = trim($params['description']) ?? $current_desc;
-        $new_status = strtoupper($params['status']) ?? $current_status;
+        $new_pass = trim($params['password']) ?? $current_pass;
 
-        if ($current_desc === $new_desc && $current_name === $new_name && $current_status === $new_status) {
+        if ($status === 'PUBLIC') {
+            $new_pass = '';
+        }
+
+        if ($current_pass === $new_pass && $current_desc === $new_desc && $current_name === $new_name) {
             return new WP_REST_Response([
                 'success' => true,
                 'thread' => null,
@@ -140,7 +149,7 @@
             'post_title' => $new_name,
             'meta_input' => [
                 'thread_description' => $new_desc,
-                'thread_status' => $new_status,
+                'thread_password' => $new_pass
             ],
         ];
         $post_id = wp_update_post($new_data);
@@ -164,7 +173,8 @@
             'parent' => get_post_meta($thread->ID, 'board_mark', true),
             'author' => get_post_meta($thread->ID, 'thread_author', true),
             'createdAt' => get_the_date('Y-m-n H:i:s', $thread->ID),
-            'status' => $new_status,
+            'status' => $status,
+            'password' => $new_pass
         ];
 
         return new WP_REST_Response([

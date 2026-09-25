@@ -376,6 +376,14 @@
                         return is_string($param) && in_array($param, ['PUBLIC', 'PRIVATE'], true);
                     }
                 ],
+                'password' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param) && mb_strlen($param) >= 6;
+                    }
+                ]
             ],
         ]);
     });
@@ -402,13 +410,12 @@
                         return is_string($param);
                     }
                 ],
-                'status' => [
+                'password' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
-                    'enum' => ['PRIVATE', 'PUBLIC'],
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) && mb_strlen($param) >= 6;
                     }
                 ],
                 'id' => [
