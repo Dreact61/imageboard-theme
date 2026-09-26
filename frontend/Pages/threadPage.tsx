@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from "react"
 import { useNavigate, useParams, Link } from "react-router"
 import storeThreads from "../Stores/threadsStore"
 
-import { _body, _text_loading, _text_error, _text_info, _hypertext, _main, _section, _card, _button, _button_cont, _inputField, _profiles_body, _messaging_cont, _profiles_btn, _profiles_btn_cont, _container, _borders } from '../style-presets'
+import { _body, _text_loading, _text_error, _text_info, _hypertext, _main, _section, _card, _button, _button_cont, _inputField, _profiles_body, _messaging_cont, _profiles_btn, _profiles_btn_cont, _container, _borders, _form_items_grid } from '../style-presets'
 import Header from "../Parts/header"
 import Footer from "../Parts/footer"
 import storeUsers from "../Stores/userStore"
@@ -37,20 +37,22 @@ export default function ThreadPage() {
             const IDAsNum = Number(thread_id)
             if (!currentThread) {
                 const log = await fetchThisThread(IDAsNum)
-    
+
                 if (!log.success) {
                     setStatus(log.status)
                     setMsg(log?.msg || 'error_unknown')
                 }
             }
+
             setIsFetching(false)
         }
         handleAsyncParse()
     }, [fetchThisThread, currentThreadPosts])
     //HANDLERS
-    const handleMessageSending = async (e:any) => {
+    const handleMessageSending = async (e: any) => {
         // тут пока остановиться, в первую очередь нужно разобраться с изменением и удалением веток. Потом перейти сюда.
     }
+
     const handleThreadDeletion = async () => {
         if (toDelete) {
             if (!currentThread || !currentThread.id) return
@@ -74,10 +76,10 @@ export default function ThreadPage() {
     let mainContent: any
     if (isFetching) {
         mainContent =
-        <div className={_body}>
-            <p className={_text_loading}>Загрузка...</p>
-            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
-        </div>
+            <div className={_body}>
+                <p className={_text_loading}>Загрузка...</p>
+                <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+            </div>
     } else if (!currentThread || error && !isFetching) {
         mainContent =
             <div className={_body}>
@@ -90,9 +92,18 @@ export default function ThreadPage() {
             <div className={_profiles_body}>
                 <Header />
 
+                {currentUser && (currentThread.author === currentUser?.username || currentUser.role === 'admin')
+                    ?
+                    <section className={`${_borders} flex flex-row w-1/2 items-center justify-around p-4 gap-8 `}>
+                        <button type="button" className={_profiles_btn} onClick={() => navigate(`/boards/${board_mark}/threads/${thread_id}/edit`)} disabled={loading}>Редактировать тред</button>
+                        <button type="button" className={_profiles_btn} onClick={handleThreadDeletion} disabled={loading}>Удалить тред</button>
+                    </section>
+                    : ''
+                }
+
                 <main className={_main}>
                     <section className={_section}>
-                        <strong>{currentThread.name}</strong>
+                        <strong>{currentThread.name} ({currentThread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</strong>
                         <p className="text-[18px]">{currentThread.description}</p>
                         <small className={`${_text_info} text-[16px]`}>Автор:{currentThread.author}</small>
                         <small className={`${_text_info} text-[16px]`}>Время создания: {currentThread.createdAt}</small>
@@ -120,15 +131,6 @@ export default function ThreadPage() {
                     <input type="text" id="message" className={_inputField} value={postContent} onChange={(e) => setPostContent(e.target.value)} />
                     <button type="button" className={_button}>Отправить</button>
                 </section>
-
-                {currentUser && (currentThread.author === currentUser?.username || currentUser.role === 'admin')
-                ? 
-                <section className={`${_borders} flex flex-row w-1/2 items-center justify-around p-4 gap-8 `}>
-                    <button type="button" className={_profiles_btn} onClick={() => navigate(`/boards/${board_mark}/threads/${thread_id}/edit`)} disabled={loading}>Редактировать тред</button>
-                    <button type="button" className={_profiles_btn} onClick={handleThreadDeletion} disabled={loading}>Удалить тред</button>
-                </section>
-                : ''
-                }
 
                 <Footer />
             </div>

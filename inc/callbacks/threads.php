@@ -7,7 +7,7 @@
         $name = $params['name'];
         $description = $params['description'] ?? '';
         $status = strtoupper($params['status']);
-        $password = $status === 'PRIVATE' ? $params['password'] : null;
+        $password = $status === 'PRIVATE' ? $params['password'] : '';
 
         $board_posts = get_posts([
             'post_type' => 'board',
@@ -18,7 +18,7 @@
         ]);
 
         if (!$board_posts) {
-            return new WP_Error('board_not_found', 'Доска не была найдена', ["status" => 400]);
+            return new WP_Error('board_not_found', 'Доска не была найдена', ["status" => 404]);
         }
 
         $post = wp_insert_post([
@@ -32,7 +32,7 @@
                 'thread_description' => $description,
                 'thread_status' => $status,
                 'thread_author' => $author,
-                'thread_password' => $password ?? ''
+                'thread_password' => $password
             ],
         ]);
 
@@ -47,8 +47,7 @@
             'parent' => $board_mark,
             'author' => $author,
             'createdAt' => get_the_date('Y-m-d H:i:s', $post),
-            'status' => $status,
-            'password' => $password
+            'status' => $status
         ];
 
         return new WP_REST_Response([
@@ -79,7 +78,6 @@
             'author' => get_post_meta($thread->ID, 'thread_author', true),
             'createdAt' => $thread->post_date,
             'status' => get_post_meta($thread->ID, 'thread_status', true),
-            'password' => get_post_meta($thread->ID, 'thread_password', true)
         ];
 
         $relative_posts = get_posts([
@@ -126,30 +124,32 @@
 
         $current_name = $thread->post_title;
         $current_desc = get_post_meta($thread->ID, 'thread_description', true);
-        $status = get_post_meta($thread->ID, 'thread_status', true);
+        $current_status = get_post_meta($thread->ID, 'thread_status', true);
         $current_pass = get_post_meta($thread->ID, 'thread_password', true);
 
         $new_name = trim($params['name']) ?? $current_name;
         $new_desc = trim($params['description']) ?? $current_desc;
         $new_pass = trim($params['password']) ?? $current_pass;
+        $new_status = trim($params['status']) ?? $current_status;
 
-        if ($status === 'PUBLIC') {
-            $new_pass = '';
-        }
-
-        if ($current_pass === $new_pass && $current_desc === $new_desc && $current_name === $new_name) {
+        if ($current_pass === $new_pass && $current_desc === $new_desc && $current_name === $new_name && $current_status === $new_status) {
             return new WP_REST_Response([
                 'success' => true,
-                'thread' => null,
+                'thread' => $thread,
             ], 204);
         }
 
         $new_data = [
             'ID' => $id,
             'post_title' => $new_name,
+            'post_status' => 'publish',
+            'post_content' => '',
             'meta_input' => [
                 'thread_description' => $new_desc,
-                'thread_password' => $new_pass
+                'thread_password' => $new_pass,
+                'thread_status' => $new_status,
+                'thread_author' => get_post_meta($id, 'thread_author', true),
+                'board_mark' => get_post_meta($id, 'board_mark', true)
             ],
         ];
         $post_id = wp_update_post($new_data);
@@ -173,7 +173,7 @@
             'parent' => get_post_meta($thread->ID, 'board_mark', true),
             'author' => get_post_meta($thread->ID, 'thread_author', true),
             'createdAt' => get_the_date('Y-m-n H:i:s', $thread->ID),
-            'status' => $status,
+            'status' => $new_status,
             'password' => $new_pass
         ];
 
@@ -206,5 +206,32 @@
             'success' => true,
             'thread_id' => $id,
         ]);
+    }
+
+    function handle_private_thread_pass_api(WP_REST_Request $request) {
+        $params = $request->get_json_params();
+
+        $password = $params['password'];
+        $id = $params['id'];
+
+        $post = get_posts([
+            'ID' => $id,
+            'post_status' => 'publish',
+            'post_type' => 'thread'
+        ]);
+        if (empty($post)) {
+            return new WP_Error('thread_not_found', 'Тред не был найден', ["status" => 404]);
+        }
+
+        $thread = $post[0];
+        $thread_pass = get_post_meta($thread->ID, 'thread_password', true);
+
+        if ($password !== $thread_pass) {
+            return new WP_Error('invalid_password', 'Пароль неверный.', ["status" => 403]);
+        }
+
+        return new WP_REST_Response([
+            'success' => true
+        ], 200);
     }
 ?>

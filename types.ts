@@ -72,7 +72,8 @@ export type ThreadRequest = {
     name: string,
     description: string,
     id?:number,
-    password?: string | null
+    password?: string | null,
+    status: string
 }
 
 export type Store_Threads = {
@@ -84,7 +85,8 @@ export type Store_Threads = {
     fetchThisThread: (id:number) => Promise<Log>,
     createNewThread: (data:Thread) => Promise<Log>,
     editThread: (id: number, data: ThreadRequest) => Promise<Log>,
-    deleteThread: (id: number) => Promise<Log>
+    deleteThread: (id: number) => Promise<Log>,
+    handlePrivateThreadLogin: (id: number, password: string) => Promise<Log>
 }
 
 //=========================

@@ -14,6 +14,7 @@ import ThreadCreationPage from "./frontend/Pages/threadCreationPage";
 import ThreadPage from "./frontend/Pages/threadPage";
 import EditBoardPage from "./frontend/Pages/editBoardPage";
 import EditThreadPage from "./frontend/Pages/editThreadPage";
+import PrivateThreadPasswordPage from "./frontend/Pages/PrivateThreadPasswordPage";
 
 document.addEventListener('DOMContentLoaded', () => {
   createRoot(document.getElementById('root')).render(
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <Route path="/boards/:board_mark/threads/create" element={<ThreadCreationPage />}></Route>
                 <Route path="/boards/:board_mark/threads/:thread_id" element={<ThreadPage />}></Route>
                 <Route path="/boards/:board_mark/threads/:thread_id/edit" element={<EditThreadPage />}></Route>
+                <Route path="/boards/:board_mark/threads/:thread_id/password" element={<PrivateThreadPasswordPage />}></Route>
 
                 <Route path="/my-profile" element={<MyProfilePage />}></Route>
                 <Route path="/my-profile/edit" element={<EditProfilePage />}></Route>

@@ -418,6 +418,14 @@
                         return is_string($param) && mb_strlen($param) >= 6;
                     }
                 ],
+                'status' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param) && in_array($param, ['PUBLIC', 'PRIVATE'], true);
+                    }
+                ],
                 'id' => [
                     'type' => 'integer',
                     'required' => true,
@@ -454,6 +462,32 @@
                     'sanitize_callback' => 'absint',
                     'validate_callback' => function ($param) {
                         return is_numeric($param) && $param > 0;
+                    }
+                ]
+            ]
+        ]);
+    });
+
+    add_action('rest_api_init', function() {
+        register_rest_route('myapi/v1', '/threads/private-pass', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => 'handle_private_thread_pass_api',
+            'permission_callback' => '__return_true',
+            'args' => [
+                'id' => [
+                    'type' => 'integer',
+                    'required' => true,
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function ($param) {
+                        return is_numeric($param) && $param > 0;
+                    }
+                ],
+                'password' => [
+                    'type' => 'string',
+                    'required' => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param) && mb_strlen($param) >= 6;
                     }
                 ]
             ]

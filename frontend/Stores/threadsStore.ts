@@ -72,7 +72,7 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 description: data.description,
                 status: data.status || 'PUBLIC',
                 author: data.author,
-                password: data.status === 'PRIVATE' ? data.password : ''
+                password: data.status
             }
 
             const res = await axios.post(`${CUSTOM_API}/threads/create`, newThread, getAxiosConfig())
@@ -127,9 +127,10 @@ const storeThreads = create<Store_Threads>((set, get) => ({
             set({error: null, loading: true, log: null})
             const dataToEdit = {
                 id: id,
-                name: data.name || null,
-                description: data.description || null,
-                password: data.password || null
+                name: data.name,
+                description: data.description,
+                password: data.password,
+                status: data.status
             }
 
             const res = await axios.put(`${CUSTOM_API}/threads/edit`, dataToEdit, getAxiosConfig())
@@ -185,6 +186,36 @@ const storeThreads = create<Store_Threads>((set, get) => ({
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
             const thread = res.data.thread_id
+
+            return {
+                success: res.data.success,
+                msg: 'Тред успешно удален',
+                status: res.status,
+                data: id
+            }
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            const Log = {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                }
+            set({
+                error: errorMsg,
+                log: Log
+            })
+            return Log
+        } finally {
+            set({loading:false})
+        }
+    },
+
+    handlePrivateThreadLogin: async (id, password) => {
+        try {
+            set({error: null, loading: true, log: null})
+            const res = await axios.post(`${CUSTOM_API}/threads/private-pass`, {id, password}, getAxiosConfig())
+            if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
 
             return {
                 success: res.data.success,

@@ -27,6 +27,7 @@ export default function EditThreadPage() {
 
     const [threadName, setThreadName] = useState('')
     const [threadDesc, setThreadDesc] = useState('')
+    const [threadStatus, setThreadStatus] = useState('PUBLIC')
     const [threadPass, setThreadPass] = useState('')
 
     useEffect(() => {
@@ -59,6 +60,7 @@ export default function EditThreadPage() {
         if (currentThread) {
             setThreadName(currentThread.name || '')
             setThreadDesc(currentThread.description || '')
+            setThreadStatus(currentThread.status || 'PUBLIC')
             setThreadPass(currentThread.password || '')
         }
     }, [currentThread])
@@ -69,7 +71,8 @@ export default function EditThreadPage() {
         const data = {
             name: threadName,
             description: threadDesc,
-            password: threadPass
+            password: threadPass,
+            status: threadStatus
         }
         const log = await editThread(Number(thread_id), data)
 
@@ -88,7 +91,7 @@ export default function EditThreadPage() {
             <p className={_text_loading}>Загрузка...</p>
             <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
         </div>
-    } else if (error || !currentThread || !thread_id) {
+    } else if (!currentThread || !thread_id) {
         return (
             <div className={_body}>
                 <p className={_text_error}>Ошибка {status}</p>
@@ -109,11 +112,16 @@ export default function EditThreadPage() {
                         <input type="text" id="name" value={threadName} onChange={(e) => setThreadName(e.target.value)} className={_inputField} disabled={loading} />
                         <label htmlFor="desc">Описание треда</label>
                         <textarea id="desc" value={threadDesc} onChange={(e) => setThreadDesc(e.target.value)} className={_textareaField} disabled={loading} />
-                        {currentThread.status === 'PRIVATE'
+                        <label htmlFor="status">Статус треда</label>
+                        <select id="status" className={_selectCard} disabled={loading} value={threadStatus} onChange={(e) => setThreadStatus(e.target.value)}>
+                            <option value="PUBLIC">Публичный</option>
+                            <option value="PRIVATE">Приватный</option>
+                        </select>
+                        {threadStatus === 'PRIVATE'
                         ?
                         <>
                         <label htmlFor="pass">Пароль приватного треда</label>
-                        <input minLength={6} id="pass" className={_selectCard} value={threadPass} onChange={(e) => setThreadPass(e.target.value)} disabled={loading} />
+                        <input required={threadStatus === 'PRIVATE'} minLength={6} id="pass" className={_inputField} value={threadPass} onChange={(e) => setThreadPass(e.target.value)} disabled={loading} />
                         </>
                         : ''
                         }
