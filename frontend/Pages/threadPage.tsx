@@ -1,11 +1,12 @@
-import { useEffect, useState, useSyncExternalStore } from "react"
+import React, { useEffect, useState, useSyncExternalStore } from "react"
 import { useNavigate, useParams, Link } from "react-router"
 import storeThreads from "../Stores/threadsStore"
 
-import { _body, _text_loading, _text_error, _text_info, _hypertext, _main, _section, _card, _button, _button_cont, _inputField, _profiles_body, _messaging_cont, _profiles_btn, _profiles_btn_cont, _container, _borders, _form_items_grid } from '../style-presets'
+import { _body, _text_loading, _text_error, _text_info, _hypertext, _main, _section, _card, _button, _button_cont, _inputField, _profiles_body, _messaging_cont, _profiles_btn, _profiles_btn_cont, _container, _borders, _form_items_grid, _selectCard } from '../style-presets'
 import Header from "../Parts/header"
 import Footer from "../Parts/footer"
 import storeUsers from "../Stores/userStore"
+import storePosts from "../Stores/postsStore"
 
 export default function ThreadPage() {
     //NAVIGATION && PARAMS
@@ -20,13 +21,19 @@ export default function ThreadPage() {
     const deleteThread = storeThreads.getState().deleteThread
 
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
+    
+    const createPost = storePosts.getState().createPost
+    const deletePost = storePosts.getState().deletePost
     //STATES
     const [isFetching, setIsFetching] = useState(true)
     const [status, setStatus] = useState(0)
     const [msg, setMsg] = useState('')
 
     const [postContent, setPostContent] = useState('')
+    const [postContentErr, setPostContentErr] = useState('')
+    
     const [toDelete, setToDelete] = useState(false)
+    const [postToDelete, setPostToDelete] = useState(false)
 
     useEffect(() => {
         if (!thread_id || !board_mark) return
@@ -49,16 +56,33 @@ export default function ThreadPage() {
         handleAsyncParse()
     }, [fetchThisThread, currentThreadPosts])
     //HANDLERS
-    const handleMessageSending = async (e: any) => {
-        // тут пока остановиться, в первую очередь нужно разобраться с изменением и удалением веток. Потом перейти сюда.
+    const handleMessageSending = async (e:React.SubmitEvent) => {
+        e.preventDefault()
+        if (!currentThread || !currentThread.id) return
+        
+        const data = {
+            content: postContent,
+            author: currentUser?.username || 'Аноним',
+            parent: currentThread.id
+        }
+
+        const log = await createPost(data)
+        
+        if (!log.success) {
+            setPostContentErr(log.msg || 'Непредвиденная ошибка.')
+        } else {
+            setPostContent('')
+        }
+
+        return
     }
 
     const handleThreadDeletion = async () => {
         if (toDelete) {
             if (!currentThread || !currentThread.id) return
-            const boardId = currentThread.id
+            const threadId = currentThread.id
 
-            const log = await deleteThread(boardId)
+            const log = await deleteThread(threadId)
 
             if (log.success) {
                 alert('Тред был успешно удален.')
@@ -69,6 +93,24 @@ export default function ThreadPage() {
         } else {
             alert('Вы уверены в том, что хотите удалить тред? (Нажмите повторно для подтверждения).')
             setToDelete(true)
+        }
+        return
+    }
+
+    const handlePostDeletion = async (id:any) => {
+        if (postToDelete) {
+            if (!id) return
+
+            const log = await deletePost(id)
+
+            if (log.success) {
+                alert('Пост удален.')
+            } else {
+                alert(log.msg || 'Что-то пошло не так при удалении поста.')
+            }
+        } else {
+            alert('Вы уверены в том, что хотите удалить пост? (Нажмите повторно для подтверждения).')
+            setPostToDelete(true)
         }
         return
     }
@@ -86,6 +128,8 @@ export default function ThreadPage() {
                 <p className={_text_error}>Ошибка {status}</p>
                 <small className={_text_info}>{error || msg || 'Перепроверьте адрес. Возможно вы написали его с ошибкой.'}</small>
                 <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+                
+                <p className="bg-[#30284b71] "></p>
             </div>
     } else {
         mainContent =
@@ -109,13 +153,17 @@ export default function ThreadPage() {
                         <small className={`${_text_info} text-[16px]`}>Время создания: {currentThread.createdAt}</small>
                     </section>
 
-                    <section className={_section}>
+                    <section className={`${_section} gap-4 px-2`}>
                         {currentThreadPosts && currentThreadPosts.length !== 0
                             ? currentThreadPosts.map(post => (
-                                <div className={_card} key={post.id}>
-                                    <b>{post.content}</b>
+                                <div className={`${_card} text-[16px]`} key={post.id}>
+                                    <b className="text-left">{post.content}</b>
                                     <small className={_text_info}>Автор: {post.author || 'Аноним'}</small>
                                     <small className={_text_info}>Время написания: {post.createdAt}</small>
+                                    {post.author === currentUser?.username || currentThread.author === currentUser?.username
+                                        ? <button className={`${_profiles_btn} mt-2 text-center`} onClick={() => handlePostDeletion(post.id)} type="button">Удалить</button>
+                                        :  ''
+                                    }
                                 </div>
                             ))
                             : <p className={_text_info}>У этого треда пока нет постов.</p>
@@ -127,10 +175,11 @@ export default function ThreadPage() {
                     </section>
                 </main>
 
-                <section className={_messaging_cont}>
-                    <input type="text" id="message" className={_inputField} value={postContent} onChange={(e) => setPostContent(e.target.value)} />
-                    <button type="button" className={_button}>Отправить</button>
-                </section>
+                <form onSubmit={(e) => handleMessageSending(e)} className={_messaging_cont}>
+                    <input type="text" id="message" className={_inputField} value={postContent} onChange={(e) => setPostContent(e.target.value)} required />
+                    <button type="submit" className={_button}>Отправить</button>
+                    {postContentErr && <p className={_text_error}>{postContentErr}</p>}
+                </form>
 
                 <Footer />
             </div>

@@ -509,7 +509,7 @@
                     'required' => true,
                     'sanitize_callback' => 'sanitize_textarea_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) && mb_strlen($param) > 0;
                     }
                 ],
                 'author' => [
@@ -524,8 +524,8 @@
                     'type' => 'integer',
                     'required' => true,
                     'sanitize_callback' => 'absint',
-                    'validate_callback' => function($param, $req, $key) {
-                        return is_numeric($param);
+                    'validate_callback' => function($param) {
+                        return is_numeric($param) && $param > 0;
                     }
                 ]
             ]
@@ -533,8 +533,8 @@
     });
 
     add_action('rest_api_init', function() {
-        register_rest_route('myapi/v1', "/posts/post-(?P<id>\d+)/delete", [
-            'methods' => 'DELETE',
+        register_rest_route('myapi/v1', "/posts/delete", [
+            'methods' => WP_REST_Server::DELETABLE,
             'callback' => 'delete_current_post_api',
             'permission_callback' => function(WP_REST_Request $req) {
                 $is_admin = mw_is_admin($req);

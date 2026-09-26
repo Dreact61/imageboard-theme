@@ -3,7 +3,7 @@
         $params = $request->get_json_params();
 
         $content = $params['content'];
-        $author = $params['author'] ?? 'Anonymous';
+        $author = $params['author'] ?? 'Аноним';
         $parent = $params['parent'];
 
         $post_id = wp_insert_post([
@@ -11,7 +11,7 @@
             'post_title' => "$author",
             'post_content' => $content,
             'post_status' => 'publish',
-            'post_author' => get_current_user_id(),
+            'post_author' => get_current_user_id() ?? 0,
             'meta_input' => [
                 'post_author' => $author,
                 'thread_id' => $parent

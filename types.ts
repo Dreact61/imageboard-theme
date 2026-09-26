@@ -96,7 +96,7 @@ export type Store_Threads = {
 export type Post = {
     id?: number,
     content: string,
-    author: string | 'Anonymous',
+    author: string | 'Аноним',
     createdAt?: string,
     parent: number // Thread.id
 }
@@ -104,8 +104,8 @@ export type Post = {
 export type Store_Posts = {
     error: string | null,
     loading: boolean,
-    createPost: (data: Post) => Promise<void>,
-    deletePost: (id: number) => Promise<void>
+    createPost: (data: Post) => Promise<Log>,
+    deletePost: (id: number) => Promise<Log>
 }
 
 //=========================
