@@ -239,6 +239,36 @@ const storeThreads = create<Store_Threads>((set, get) => ({
         } finally {
             set({loading:false})
         }
+    },
+
+    handleThreadPasswordOutput: async (id) => {
+        try {
+            set({error: null, loading: true, log: null})
+            const res = await axios.post(`${CUSTOM_API}/threads/password`, {id}, getAxiosConfig())
+            if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+
+            return {
+                success: res.data.success,
+                msg: 'Тред успешно удален',
+                status: res.status,
+                data: res.data.password
+            }
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            const Log = {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                }
+            set({
+                error: errorMsg,
+                log: Log
+            })
+            return Log
+        } finally {
+            set({loading:false})
+        }
     }
 }))
 

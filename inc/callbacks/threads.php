@@ -7,7 +7,7 @@
         $name = $params['name'];
         $description = $params['description'] ?? '';
         $status = strtoupper($params['status']);
-        $password = $status === 'PRIVATE' ? $params['password'] : '';
+        $password = $params['password'] ?? '';
 
         $board_posts = get_posts([
             'post_type' => 'board',
@@ -59,17 +59,11 @@
     function fetch_current_thread_api(WP_REST_Request $request) {
         $id = $request->get_param('id');
 
-        $post = get_posts([
-            'ID' => $id,
-            'posts_per_page' => 1,
-            'post_type' => 'thread',
-            'post_status' => 'publish',
-        ]);
-        if (is_wp_error($post)) {
+        $thread = get_post($id);
+        if (!isset($thread)) {
             return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500]);
         }
 
-        $thread = $post[0];
         $result_thread = [
             'id' => $thread->ID,
             'name' => $thread->post_title,
@@ -83,7 +77,7 @@
         $relative_posts = get_posts([
             'posts_per_page' => -1,
             'post_type' => 'thread_post',
-            'post_status' => 'any',
+            'post_status' => 'publish',
             'meta_key' => 'thread_id',
             'meta_value' => $thread->ID
         ]);
@@ -107,20 +101,12 @@
 
     function edit_current_thread_api(WP_REST_Request $request) {
         $params = $request->get_json_params();
-        
         $id = $params['id'];
 
-        $post = get_posts([
-            'include' => $id,
-            'post_type' => 'thread',
-            'post_status' => 'publish'
-        ]);
-
-        if (empty($post)) {
+        $thread = get_post($id);
+        if (!isset($thread)) {
             return new WP_Error('thread_not_found', 'Тред не был найден', ["status" => 404]);
         }
-
-        $thread = $post[0];
 
         $current_name = $thread->post_title;
         $current_desc = get_post_meta($thread->ID, 'thread_description', true);
@@ -214,16 +200,11 @@
         $password = $params['password'];
         $id = $params['id'];
 
-        $post = get_posts([
-            'ID' => $id,
-            'post_status' => 'publish',
-            'post_type' => 'thread'
-        ]);
-        if (empty($post)) {
+        $thread = get_post($id);
+        if (empty($thread)) {
             return new WP_Error('thread_not_found', 'Тред не был найден', ["status" => 404]);
         }
 
-        $thread = $post[0];
         $thread_pass = get_post_meta($thread->ID, 'thread_password', true);
 
         if ($password !== $thread_pass) {
@@ -233,5 +214,19 @@
         return new WP_REST_Response([
             'success' => true
         ], 200);
+    }
+
+    function handle_thread_password_output_api(WP_REST_Request $request) {
+        $id = $request->get_param('id');
+        $thread_password = get_post_meta($id, 'thread_password', true);
+
+        if (!$thread_password) {
+            return new WP_Error('thread_not_found', 'Тред не был найден', ["status" => 404, "success" => false]);
+        }
+
+        return new WP_REST_Response([
+            'success' => true,
+            'password' => $thread_password
+        ]);
     }
 ?>

@@ -21,7 +21,7 @@ export default function ThreadPage() {
     const deleteThread = storeThreads.getState().deleteThread
 
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
-    
+
     const createPost = storePosts.getState().createPost
     const deletePost = storePosts.getState().deletePost
     //STATES
@@ -31,7 +31,7 @@ export default function ThreadPage() {
 
     const [postContent, setPostContent] = useState('')
     const [postContentErr, setPostContentErr] = useState('')
-    
+
     const [toDelete, setToDelete] = useState(false)
     const [postToDelete, setPostToDelete] = useState(false)
 
@@ -42,24 +42,24 @@ export default function ThreadPage() {
             setIsFetching(true)
 
             const IDAsNum = Number(thread_id)
-            if (!currentThread) {
-                const log = await fetchThisThread(IDAsNum)
+            const log = await fetchThisThread(IDAsNum)
 
-                if (!log.success) {
-                    setStatus(log.status)
-                    setMsg(log?.msg || 'error_unknown')
-                }
+            if (!log.success) {
+                setStatus(log.status)
+                setMsg(log?.msg || 'error_unknown')
             }
 
             setIsFetching(false)
         }
         handleAsyncParse()
-    }, [fetchThisThread, currentThreadPosts])
+
+        console.log(currentThread)
+    }, [thread_id, board_mark])
     //HANDLERS
-    const handleMessageSending = async (e:React.SubmitEvent) => {
+    const handleMessageSending = async (e: React.SubmitEvent) => {
         e.preventDefault()
         if (!currentThread || !currentThread.id) return
-        
+
         const data = {
             content: postContent,
             author: currentUser?.username || 'Аноним',
@@ -67,7 +67,7 @@ export default function ThreadPage() {
         }
 
         const log = await createPost(data)
-        
+
         if (!log.success) {
             setPostContentErr(log.msg || 'Непредвиденная ошибка.')
         } else {
@@ -86,7 +86,7 @@ export default function ThreadPage() {
 
             if (log.success) {
                 alert('Тред был успешно удален.')
-                navigate('/')
+                navigate(`/boards/${board_mark}`)
             } else {
                 alert(log.msg || 'Что-то пошло не так при удалении треда.')
             }
@@ -97,7 +97,7 @@ export default function ThreadPage() {
         return
     }
 
-    const handlePostDeletion = async (id:any) => {
+    const handlePostDeletion = async (id: any) => {
         if (postToDelete) {
             if (!id) return
 
@@ -128,7 +128,7 @@ export default function ThreadPage() {
                 <p className={_text_error}>Ошибка {status}</p>
                 <small className={_text_info}>{error || msg || 'Перепроверьте адрес. Возможно вы написали его с ошибкой.'}</small>
                 <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
-                
+
                 <p className="bg-[#30284b71] "></p>
             </div>
     } else {
@@ -162,7 +162,7 @@ export default function ThreadPage() {
                                     <small className={_text_info}>Время написания: {post.createdAt}</small>
                                     {post.author === currentUser?.username || currentThread.author === currentUser?.username
                                         ? <button className={`${_profiles_btn} mt-2 text-center`} onClick={() => handlePostDeletion(post.id)} type="button">Удалить</button>
-                                        :  ''
+                                        : ''
                                     }
                                 </div>
                             ))

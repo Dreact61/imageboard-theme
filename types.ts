@@ -87,6 +87,7 @@ export type Store_Threads = {
     editThread: (id: number, data: ThreadRequest) => Promise<Log>,
     deleteThread: (id: number) => Promise<Log>,
     handlePrivateThreadLogin: (id: number, password: string) => Promise<Log>
+    handleThreadPasswordOutput: (id: number) => Promise<Log>
 }
 
 //=========================

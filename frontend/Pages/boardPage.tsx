@@ -96,7 +96,12 @@ export default function BoardPage() {
                         {currentBoardThreads && currentBoardThreads.length !== 0
                             ? currentBoardThreads.map(thread => (
                                 <div className={_card} key={thread.id}>
-                                    <strong><Link className={_hypertext} to={thread.status === 'PUBLIC' ? `/boards/${board_mark}/threads/${thread.id}` : `/boards/${board_mark}/threads/${thread.id}/password`}>{thread.name}</Link></strong>
+                                    <strong><Link className={_hypertext} to={
+                                        thread.status === 'PUBLIC' 
+                                        ? `/boards/${board_mark}/threads/${thread.id}`
+                                        : (currentUser?.username === thread.author 
+                                            ? `/boards/${board_mark}/threads/${thread.id}`
+                                            : `/boards/${board_mark}/threads/${thread.id}/password`)}>{thread.name}</Link></strong>
                                     <i>{thread.description ? thread.description : 'Нет описания.'}</i>
                                     <small className={_text_info}>Автор: {thread.author || 'Аноним'}</small>
                                     <small className={_text_info}>Создано {thread.createdAt}</small>

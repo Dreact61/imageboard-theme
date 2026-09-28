@@ -15,6 +15,7 @@ export default function EditThreadPage() {
     const currentThread = useSyncExternalStore(storeThreads.subscribe, () => storeThreads.getState().currentThread, () => null)
     const fetchThisThread = storeThreads.getState().fetchThisThread
     const editThread = storeThreads.getState().editThread
+    const handleThreadPasswordOutput = storeThreads.getState().handleThreadPasswordOutput
 
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
 
@@ -57,11 +58,25 @@ export default function EditThreadPage() {
     }, [thread_id, fetchThisThread, fetchThisBoard])
 
     useEffect(() => {
+        const handleAsyncParse = async () => {
+            if (currentThread && currentThread.status === 'PRIVATE') {
+                const log:any = await handleThreadPasswordOutput(Number(thread_id))
+
+                if (!log.status || !log.data) {
+                    setStatus(log.status)
+                    setMsg(log.msg || error || 'error_unknown')
+                }
+                setThreadPass(log.data || '')
+            }
+        }
+        handleAsyncParse()
+    }, [currentThread])
+
+    useEffect(() => {
         if (currentThread) {
             setThreadName(currentThread.name || '')
             setThreadDesc(currentThread.description || '')
             setThreadStatus(currentThread.status || 'PUBLIC')
-            setThreadPass(currentThread.password || '')
         }
     }, [currentThread])
     //HANDLERS
