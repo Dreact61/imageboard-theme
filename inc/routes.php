@@ -545,6 +545,22 @@
                     'validate_callback' => function($param) {
                         return is_numeric($param) && $param > 0;
                     }
+                ],
+                'image_url' => [
+                    'type' => 'string',
+                    'required' => false,
+                    'description' => 'Ссылка на внешнее изображение',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => function($param) {
+                        return is_string($param) || is_null($param) || is_link($param) || is_object($param);
+                    }
+                ],
+                'image_file' => [
+                    'required' => false,
+                    'description' => 'Файл изображения с пк',
+                    'validate_callback' => function($param) {
+                        return isset($_FILES[$param]) && $_FILES[$param]['error'] === UPLOAD_ERR_OK;
+                    }
                 ]
             ]
         ]);

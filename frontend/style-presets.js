@@ -38,4 +38,4 @@ export const _body = `${_text} flex flex-col gap-8 absolute left-0 top-0 items-c
 
 export const _profiles_body = `${_body} justify-center gap-5`
 
-export const _messaging_cont = ` bg-[#30284b71] border-2 rounded-md border-[#3f2b8a] flex flex-col justify-center items-center p-6 border w-1/2 sticky bottom-1/10 flex-row gap-5`
+export const _messaging_cont = `bg-[#382772]/60 border-2 rounded-md border-[#3f2b8a] flex flex-col justify-center items-center p-6 border w-1/2 sticky bottom-1/12 flex-row gap-5`

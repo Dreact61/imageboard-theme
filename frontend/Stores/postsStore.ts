@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import axios, {AxiosRequestConfig} from 'axios'
-import type { Post, Store_Posts } from '../../types'
+import type { Post, PostRequest, Store_Posts } from '../../types'
 
 const CUSTOM_API = process.env.CUSTOM_API
 
@@ -21,13 +21,21 @@ const storePosts = create<Store_Posts>((set, get) => ({
         try {
             set({loading: true, error: null})
 
-            const postData:Post = {
+            const postData:PostRequest = {
                 content: data.content,
                 author: data.author,
-                parent: data.parent
+                parent: data.parent,
+                FormData: {
+                    image_file: data.image instanceof Blob ? data.image : null,
+                    image_url: typeof data.image === 'string' ? data.image : null
+                }
             }
 
-            const res = await axios.post(`${CUSTOM_API}/posts/create`, postData)
+            const res = await axios.post(`${CUSTOM_API}/posts/create`, postData, {
+                headers: {
+                    'Content-Type': 'multipart/formdata'
+                }
+            })
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
             return {

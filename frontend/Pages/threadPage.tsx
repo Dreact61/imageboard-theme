@@ -2,11 +2,12 @@ import React, { useEffect, useState, useSyncExternalStore } from "react"
 import { useNavigate, useParams, Link } from "react-router"
 import storeThreads from "../Stores/threadsStore"
 
-import { _body, _text_loading, _text_error, _text_info, _hypertext, _main, _section, _card, _button, _button_cont, _inputField, _profiles_body, _messaging_cont, _profiles_btn, _profiles_btn_cont, _container, _borders, _form_items_grid, _selectCard } from '../style-presets'
+import { _body, _text_loading, _text_error, _text_info, _hypertext, _main, _section, _card, _button, _button_cont, _inputField, _profiles_body, _messaging_cont, _profiles_btn, _profiles_btn_cont, _container, _borders, _form_items_grid, _selectCard, _text, _img } from '../style-presets'
 import Header from "../Parts/header"
 import Footer from "../Parts/footer"
 import storeUsers from "../Stores/userStore"
 import storePosts from "../Stores/postsStore"
+import { Post } from "../../types"
 
 export default function ThreadPage() {
     //NAVIGATION && PARAMS
@@ -19,6 +20,9 @@ export default function ThreadPage() {
     const currentThreadPosts = useSyncExternalStore(storeThreads.subscribe, () => storeThreads.getState().currentThreadPosts, () => [])
     const fetchThisThread = storeThreads.getState().fetchThisThread
     const deleteThread = storeThreads.getState().deleteThread
+    
+    const dynamicPostAddition = storeThreads.getState().dynamicPostAddition
+    const dynamicPostDeletion = storeThreads.getState().dynamicPostDeletion
 
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
 
@@ -72,10 +76,14 @@ export default function ThreadPage() {
             setPostContentErr(log.msg || 'Непредвиденная ошибка.')
         } else {
             setPostContent('')
+            dynamicPostAddition(log.data as Post)
         }
 
         return
     }
+    useEffect(() => {
+        fetchThisThread
+    }, [currentThreadPosts])
 
     const handleThreadDeletion = async () => {
         if (toDelete) {
@@ -105,6 +113,7 @@ export default function ThreadPage() {
 
             if (log.success) {
                 alert('Пост удален.')
+                dynamicPostDeletion(id)
             } else {
                 alert(log.msg || 'Что-то пошло не так при удалении поста.')
             }
@@ -148,20 +157,23 @@ export default function ThreadPage() {
                 <main className={_main}>
                     <section className={_section}>
                         <strong>{currentThread.name} ({currentThread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</strong>
-                        <p className="text-[18px]">{currentThread.description}</p>
-                        <small className={`${_text_info} text-[16px]`}>Автор:{currentThread.author}</small>
+                        <p className="text-[18px] py-2">{currentThread.description}</p>
+                        <small className={`${_text_info} py-2 text-[16px]`}>Автор:{currentThread.author}</small>
                         <small className={`${_text_info} text-[16px]`}>Время создания: {currentThread.createdAt}</small>
                     </section>
 
                     <section className={`${_section} gap-4 px-2`}>
                         {currentThreadPosts && currentThreadPosts.length !== 0
                             ? currentThreadPosts.map(post => (
-                                <div className={`${_card} text-[16px]`} key={post.id}>
-                                    <b className="text-left">{post.content}</b>
-                                    <small className={_text_info}>Автор: {post.author || 'Аноним'}</small>
-                                    <small className={_text_info}>Время написания: {post.createdAt}</small>
+                                <div className={`bg-[#3f229e3a]rounded-md border-[#432f92] grid grid-cols-1 justify-center items-center p-3 border-2 w-3/4 text-[16px]`} key={post.id}>
+                                    <h2 className={`${_text} font-black pb-2 text-[20px] text-left`}>{post.author || 'Аноним'} - ({post.createdAt})</h2>
+                                    
+                                    <div className="flex gap-4">
+                                        <img className={_img} src={(post.image as string) || 'imageboard-theme/public/pictures/ico.png'} alt="Image" />
+                                        <b className="text-left">{post.content}</b>
+                                    </div>
                                     {post.author === currentUser?.username || currentThread.author === currentUser?.username
-                                        ? <button className={`${_profiles_btn} mt-2 text-center`} onClick={() => handlePostDeletion(post.id)} type="button">Удалить</button>
+                                        ? <button className={`${_profiles_btn} mt-2 text-center w-1/2`} onClick={() => handlePostDeletion(post.id)} type="button">Удалить</button>
                                         : ''
                                     }
                                 </div>
@@ -176,7 +188,7 @@ export default function ThreadPage() {
                 </main>
 
                 <form onSubmit={(e) => handleMessageSending(e)} className={_messaging_cont}>
-                    <input type="text" id="message" className={_inputField} value={postContent} onChange={(e) => setPostContent(e.target.value)} required />
+                    <input type="text" placeholder="Написать..." id="message" className={_inputField} value={postContent} onChange={(e) => setPostContent(e.target.value)} required />
                     <button type="submit" className={_button}>Отправить</button>
                     {postContentErr && <p className={_text_error}>{postContentErr}</p>}
                 </form>

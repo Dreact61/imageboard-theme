@@ -269,7 +269,10 @@ const storeThreads = create<Store_Threads>((set, get) => ({
         } finally {
             set({loading:false})
         }
-    }
+    },
+
+    dynamicPostAddition: async (post) => set((state) => ({currentThreadPosts: [...state.currentThreadPosts, post]})),
+    dynamicPostDeletion: async (id) => set((state) => ({currentThreadPosts: state.currentThreadPosts.filter(post => post.id !== id)}))
 }))
 
 export default storeThreads
