@@ -1,7 +1,8 @@
 import { useEffect, useState, useSyncExternalStore } from "react"
 import { useNavigate, Link } from "react-router"
 import storeUsers from "../Stores/userStore"
-import { _body, _hypertext, _button, _button_cont, _form_items_grid, _inputField, _main, _section, _text_error, _text_info, _textareaField } from "../style-presets"
+import { ui } from "../style-presets"
+
 
 export default function EditProfilePage() {
     //NAVIGATION
@@ -14,9 +15,11 @@ export default function EditProfilePage() {
     const currentDesc = currentUser?.description
     const currentPassword = currentUser?.password
 
+
     const [name, setName] = useState('')
     const [desc, setDesc] = useState('')
     const [pass, setPass] = useState('')
+
 
     useEffect(() => {
         if (!currentUser?.username) return
@@ -25,9 +28,10 @@ export default function EditProfilePage() {
         setPass(currentUser.password || '')
     }, [])
     //HANDLERS
-    const handleFormSubmission = async (e:React.SubmitEvent) => {
+    const handleFormSubmission = async (e: React.SubmitEvent) => {
         e.preventDefault()
         if (!currentUser?.id) return
+
 
         const data = {
             username: name !== currentName ? name : null,
@@ -36,7 +40,9 @@ export default function EditProfilePage() {
             id: currentUser.id
         }
 
+
         const isExecuted = await editUser(data)
+
 
         if (isExecuted.success) {
             alert('Ваш профиль был успешно изменен!')
@@ -47,38 +53,41 @@ export default function EditProfilePage() {
         return
     }
     //RENDER
-    let mainContent:any
+    let mainContent: any
+
 
     if (!currentUser) {
-        mainContent = 
-        <div className={_body}>
-            <p className={_text_error}>Ошибка 401</p>
-            <small className={_text_info}>Вы не авторизованы.</small>
-            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
-        </div>
+        mainContent =
+            <div className={ui.errorPage}>
+                <p className={ui.errorTitle}>Ошибка 401</p>
+                <small className={ui.errorText}>Вы не авторизованы.</small>
+                <small><Link className={ui.link} to="/">Вернуться назад</Link></small>
+            </div>
     } else {
-        mainContent = 
-        <div className={_body}>
-            <form className={_main} onSubmit={(e) => handleFormSubmission(e)}>
-                <section className={_section}>
-                    <strong>Редактирование Профиля</strong>
-                </section>
+        mainContent =
+            <div className={ui.page}>
+                <form className={`${ui.card} mx-auto max-w-2xl`} onSubmit={(e) => handleFormSubmission(e)}>
+                    <section className={`${ui.threadInfo} mb-5 rounded-md`}>
+                        <strong className={ui.threadTitle}>Редактирование Профиля</strong>
+                    </section>
 
-                <section className={_form_items_grid}>
-                    <label htmlFor="name">Имя Пользователя</label>
-                    <input type="text" id="name" className={_inputField} value={name} onChange={(e) => setName(e.target.value)} />
-                    <label htmlFor="desc">Описание</label>
-                    <textarea id="desc" className={_textareaField} value={desc} onChange={(e) => setDesc(e.target.value)} />
-                    <label htmlFor="pass">Пароль</label>
-                    <input type="password" id="pass" className={_inputField} value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Введите новый пароль" />
-                </section>
 
-                <section className={_button_cont}>
-                    <button type="submit" className={_button}>Подтвердить</button>
-                    <button type="button" onClick={() => navigate('/my-profile')} className={_button}>Назад</button>
-                </section>
-            </form>
-        </div>
+                    <section className="grid w-full grid-cols-1 items-center gap-4 sm:grid-cols-2">
+                        <label htmlFor="name" className={ui.text}>Имя Пользователя</label>
+                        <input type="text" id="name" className={ui.input} value={name} onChange={(e) => setName(e.target.value)} />
+                        <label htmlFor="desc" className={ui.text}>Описание</label>
+                        <textarea id="desc" className={`${ui.input} h-32 resize-none`} value={desc} onChange={(e) => setDesc(e.target.value)} />
+                        <label htmlFor="pass" className={ui.text}>Пароль</label>
+                        <input type="password" id="pass" className={ui.input} value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Введите новый пароль" />
+                    </section>
+
+
+                    <section className="mt-5 flex w-full items-center justify-evenly gap-4">
+                        <button type="submit" className={ui.button}>Подтвердить</button>
+                        <button type="button" onClick={() => navigate('/my-profile')} className={ui.button}>Назад</button>
+                    </section>
+                </form>
+            </div>
     }
     return mainContent
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useSyncExternalStore } from "react"
 import { useNavigate, useParams, Link } from "react-router"
 import storeThreads from "../Stores/threadsStore"
 
-import { _body, _text_loading, _text_error, _text_info, _hypertext, _main, _section, _card, _button, _button_cont, _inputField, _profiles_body, _messaging_cont, _profiles_btn, _profiles_btn_cont, _container, _borders, _form_items_grid, _selectCard, _text, _img } from '../style-presets'
+import { ui } from "../style-presets"
 import Header from "../Parts/header"
 import Footer from "../Parts/footer"
 import storeUsers from "../Stores/userStore"
@@ -148,8 +148,8 @@ export default function ThreadPage() {
                 {currentUser && (currentThread.author === currentUser?.username || currentUser.role === 'admin')
                     ?
                     <section className={`${_borders} flex flex-row w-1/2 items-center justify-around p-4 gap-8 `}>
-                        <button type="button" className={_profiles_btn} onClick={() => navigate(`/boards/${board_mark}/threads/${thread_id}/edit`)} disabled={loading}>Редактировать тред</button>
-                        <button type="button" className={_profiles_btn} onClick={handleThreadDeletion} disabled={loading}>Удалить тред</button>
+                        <button type="button" className={ui.button} onClick={() => navigate(`/boards/${board_mark}/threads/${thread_id}/edit`)} disabled={loading}>Редактировать тред</button>
+                        <button type="button" className={ui.deleteButton} onClick={handleThreadDeletion} disabled={loading}>Удалить тред</button>
                     </section>
                     : ''
                 }

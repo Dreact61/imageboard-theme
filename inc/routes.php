@@ -53,7 +53,7 @@
 
     add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', '/login', array(
-            'methods' => 'POST',
+            'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'handle_user_login',
             'permission_callback' => '__return_true',
             'args' => array(
@@ -82,24 +82,14 @@
         register_rest_route('myapi/v1', "/users/edit", [
             'methods' => WP_REST_Server::EDITABLE,
             'callback' => 'handle_user_edit',
-            'permission_callback' => function(WP_REST_Request $req) {
-                $user_id = mw_determine_user_from_jwt(absint($req->get_param('id')));
-
-                if (!$user_id || is_wp_error($user_id)) {
-                    return new WP_Error('rest_forbidden', 'Вы не авторизованы', ["status" => 401]);
-                }
-                wp_set_current_user( $user_id );
-
-                $target_id = absint($req->get_param('id'));
-                return $user_id === $target_id;
-            },
+            'permission_callback' => 'mw_can_edit_user',
             'args' => [
                 'username' => [
                     'type' => 'string',
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param) && mb_strlen($param) >= 4;
+                        return (is_string($param) && mb_strlen($param) >= 4) || is_null($param);
                     }
                 ],
                'description' => [
@@ -107,7 +97,7 @@
                     'required' => false,
                     'sanitize_callback' => 'sanitize_textarea_field',
                     'validate_callback' => function($param) {
-                        return is_string($param);
+                        return is_string($param) || is_null($param);
                     }
                 ],
                 'password' => [
@@ -115,7 +105,7 @@
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param) && mb_strlen($param) >= 6;
+                        return (is_string($param) && mb_strlen($param) >= 6) || is_null($param);
                     }
                 ],
                 'id' => [
@@ -134,20 +124,7 @@
         register_rest_route('myapi/v1', '/users/delete', [
             'methods' => WP_REST_Server::ALLMETHODS,
             'callback' => 'handle_user_deletion',
-            'permission_callback' => function(WP_REST_Request $req) {
-                $is_admin = mw_is_admin($req);
-                if ($is_admin) {
-                    return true;
-                }
-                
-                $user_id = mw_determine_user_from_jwt(absint($req->get_param('id')));
-                if (is_wp_error($user_id)) {
-                    return $user_id;
-                }
-
-                $target_id = absint($req->get_param('id'));
-                return $user_id === (int)$target_id;
-            },
+            'permission_callback' => 'mw_can_edit_user',
             'args' => [
                 'id' => [
                     'type' => 'integer',
@@ -163,9 +140,9 @@
 
     add_action('rest_api_init', function() {
         register_rest_route('myapi/v1', '/logout', [
-            'methods' => WP_REST_Server::CREATABLE,
+            'methods' => WP_REST_Server::READABLE,
             'callback' => 'handle_user_logout',
-            'permission_callback' => 'mw_determine_user_from_jwt'
+            'permission_callback' => '__return_true'
         ]);
     });
 
@@ -287,14 +264,7 @@
         register_rest_route('myapi/v1', '/boards/delete', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'delete_current_board_api',
-            'permission_callback' => function(WP_REST_Request $req) {
-                $is_admin = mw_is_admin($req);
-                if ($is_admin) {
-                    return true;
-                }
-
-                return mw_is_board_owner($req);
-            },
+            'permission_callback' => 'mw_is_board_owner',
             'args' => [
                 'id' => [
                     'type' => 'integer',
@@ -334,7 +304,7 @@
         register_rest_route('myapi/v1', '/threads/create', [
             'methods' => 'POST',
             'callback' => 'imageboard_create_thread',
-            'permission_callback' => 'mw_determine_user_from_jwt',
+            'permission_callback' => 'mw_is_authenticated',
             'args' => [
                 'name' => [
                     'type' => 'string',
@@ -442,19 +412,7 @@
         register_rest_route('myapi/v1', "/threads/delete", [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'delete_current_thread_api',
-            'permission_callback' => function(WP_REST_Request $req) {
-                $is_admin = mw_is_admin($req);
-                if ($is_admin) {
-                    return true;
-                }
-
-                $is_board_owner = mw_is_board_owner($req);
-                if ($is_board_owner) {
-                    return true;
-                }
-                
-                return mw_is_thread_owner($req);
-            },
+            'permission_callback' => 'mw_is_thread_owner',
             'args' => [
                 'id' => [
                     'type' => 'integer',
@@ -570,19 +528,7 @@
         register_rest_route('myapi/v1', "/posts/delete", [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => 'delete_current_post_api',
-            'permission_callback' => function(WP_REST_Request $req) {
-                $is_admin = mw_is_admin($req);
-                if ($is_admin) {
-                    return true;
-                }
-
-                $is_thread_owner = mw_is_thread_owner($req);
-                if ($is_thread_owner) {
-                    return true;
-                }
-
-                return mw_is_post_author($req);
-            },
+            'permission_callback' => 'mw_is_post_owner',
             'args' => [
                 'id' => [
                     'type' => 'integer',

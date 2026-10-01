@@ -1,106 +1,129 @@
 <?php
-function mw_determine_user_from_jwt($user_id) {
+
+// Этот хук заставляет WordPress один раз при старте запроса прочитать куку
+add_filter('determine_current_user', 'dchan_global_jwt_auth', 20);
+
+function dchan_global_jwt_auth($user_id) {
+    // Если WP уже определил юзера (например, в админке по родной куке), не мешаем
     if ($user_id) {
         return $user_id;
     }
 
+    // Достаем строку токена из куки
     $token = $_COOKIE['dchan_auth_token'] ?? '';
     if (empty($token)) {
-        return $user_id;
+        return $user_id; // возвращаем 0
     }
 
+    // Валидируем РЕАЛЬНЫЙ токен, а не его название
     $token_data = DCHAN_JWT::validate($token);
-    if (empty($token_data['uid']) || !$token_data) {
-        return $user_id;
+    if (empty($token_data['uid'])) {
+        return $user_id; // возвращаем 0, если токен битый или просрочен
     }
 
-    $detected_user_id = (int) $token_data['uid'];
-    
-    $fresh_token = DCHAN_JWT::generate($detected_user_id);
-    setcookie('dchan_auth_token', $fresh_token, time() + (DAY_IN_SECONDS * 7), '/', '', false, true);
+    return (int) $token_data['uid'];
+}
 
-    return $detected_user_id;
-};
 
-function mw_is_authenticated(WP_REST_Request $req) {
-    $token = $_COOKIE['dchan_auth_token'] ?? '';
 
-    if (empty($token)) {
+function mw_is_authenticated(WP_REST_Request $req)
+{
+    $user_id = get_current_user_id();
+
+    if (!$user_id) {
         return new WP_Error('rest_forbidden', 'Вы не авторизованы', ['status' => 401]);
     }
 
-    $token_data = DCHAN_JWT::validate($token);
-    if (!$token_data || empty($token_data['uid'])) {
-        return new WP_Error('invalid_token', 'Токен сломан или просрочен', ['status' => 401]);
-    }
-
-    $user_id = $token_data['uid'];
-    $fresh_token = DCHAN_JWT::generate($user_id);
-    setcookie('dchan_auth_token', $fresh_token, time() + (DAY_IN_SECONDS * 7), '/', '', false, true);
-
-    wp_set_current_user((int)$token_data['uid']);
     return true;
 }
 
-function mw_is_admin(WP_REST_Request $req) {
+// Имеет ли юзер права админа?
+
+function mw_has_admin_permission(WP_REST_Request $req)
+{
     $is_auth = mw_is_authenticated($req);
     if (is_wp_error($is_auth)) {
         return $is_auth;
     }
 
-    $has_admin_rights = current_user_can('manage_options');
-    if(!$has_admin_rights) {
-        return new WP_Error('not_admin', 'Недостаточно прав', ["status" => 403]);
+    if (!current_user_can('manage_options')) {
+        return new WP_Error('not_admin', 'Вы не обладаете правами администратора', ["status" => 403, "success" => false]);
     }
 
     return true;
 }
 
-function mw_is_board_owner(WP_REST_Request $req) {
-    $is_auth = mw_is_authenticated($req);
-    if (is_wp_error($is_auth)) {
-        return $is_auth;
+// Может ли юзер редачить доску?
+
+function mw_is_board_owner(WP_REST_Request $req)
+{
+    $is_admin = mw_has_admin_permission($req);
+    if (is_wp_error($is_admin)) {
+        $board_author = get_post_meta(absint($req->get_param('id')), 'board_author', true);
+        
+        $user_data = get_userdata(get_current_user_id());
+        $current_username = $user_data->user_login ?? '';
+
+        if ($current_username !== $board_author) {
+            return new WP_Error('rest_forbidden', 'Вы не являетесь создателем данной доски.', ["status" => 403, "success" => false]);
+        }
     }
-    mw_determine_user_from_jwt(get_current_user_id());
 
-    $board_author = get_post_meta(absint($req->get_param('id')), 'board_author', true);
-    $username = get_userdata(get_current_user_id())->user_login;
-
-    if (!$username) {
-        return new WP_Error('rest_forbidden', 'Вы не авторизованы', ["status" => 401, "success" => false]);
-    }
-
-    return $username === $board_author;
+    return true;
 }
 
-function mw_is_thread_owner(WP_REST_Request $req) {
-    $is_auth = mw_is_authenticated($req);
-    if (is_wp_error($is_auth)) {
-        return $is_auth;
+// Может ли юзер редачить тред?
+
+function mw_is_thread_owner(WP_REST_Request $req)
+{
+    $is_board_owner = mw_is_board_owner($req);
+    if (is_wp_error($is_board_owner)) {
+        $thread_author = get_post_meta(absint($req->get_param('id')), 'thread_author', true);
+        
+        $user_data = get_userdata(get_current_user_id());
+        $current_username = $user_data->user_login ?? '';
+
+        if ($current_username !== $thread_author) {
+            return new WP_Error('rest_forbidden', 'Вы не являетесь создателем данного треда.', ["status" => 403, "success" => false]);
+        }
     }
 
-    $thread_author = get_post_meta(absint($req->get_param('id')), 'thread_author', true);
-    $username = get_userdata(get_current_user_id())->user_login;
+    return true;
+};
 
-    if (!$username) {
-        return new WP_Error('rest_forbidden', 'Вы не авторизованы', ["status" => 401, "success" => false]);
+// Может ли юзер редачить пост?
+
+function mw_is_post_author(WP_REST_Request $req)
+{
+    $is_thread_owner = mw_is_thread_owner($req);
+    if (is_wp_error($is_thread_owner)) {
+        $post_author = get_post_meta(absint($req->get_param('id')), 'post_author', true);
+        
+        $user_data = get_userdata(get_current_user_id());
+        $current_username = $user_data->user_login ?? '';
+
+        if ($current_username !== $post_author) {
+            return new WP_Error('rest_forbidden', 'Вы не являетесь создателем данного поста.', ["status" => 403, "success" => false]);
+        }
     }
 
-    return $username === $thread_author;
+    return true;
 }
 
-function mw_is_post_author(WP_REST_Request $req) {
-    $is_auth = mw_is_authenticated($req);
-    if (is_wp_error($is_auth)) {
-        return $is_auth;
+// Может ли юзер редачить юзера?
+
+function mw_can_edit_user(WP_REST_Request $req)
+{
+    $is_admin = mw_has_admin_permission($req);
+    if (is_wp_error($is_admin)) {
+        $user_data = get_userdata(get_current_user_id());
+        $target_id = $user_data->user_login ?? '';
+
+        $current_id = absint($req->get_param('id')) ?? 0; 
+        if ($current_id !== $target_id) {
+            return new WP_Error('rest_forbidden', 'Вы не обладаете нужными правами для этого.', ["status" => 403, "success" => false]);
+        }
     }
 
-    $post_author = get_post_meta(absint($req->get_param('id')), 'post_author', true);
-    $username = get_userdata(get_current_user_id())->user_login;
-
-    if (!$username) {
-        return new WP_Error('rest_forbidden', 'Вы не авторизованы', ["status" => 401, "success" => false]);
-    }
-    return $username === $post_author;
+    return true;
 }
-?>

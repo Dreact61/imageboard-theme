@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios, {AxiosRequestConfig} from "axios";
+import axios, {AxiosHeaders, AxiosRequestConfig, AxiosRequestHeaders} from "axios";
 import { persist } from "zustand/middleware";
 import type { Store_Users, User } from "../../types";
 
@@ -165,7 +165,7 @@ const storeUsers = create<Store_Users>()(
 
         logout: async () => {
             try {
-                const res = await axios.post(`${CUSTOM_API}/logout`, {}, getAxiosConfig())
+                const res = await axios.get(`${CUSTOM_API}/logout`)
                 if (res.data.success) {
                     set({
                         log: {

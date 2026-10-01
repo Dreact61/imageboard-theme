@@ -64,4 +64,10 @@ add_filter('allowed_redirect_hosts', function($hosts) {
 // }
 // add_action('init', 'single_time_delete_all_cpt_boards');
 
+// add_filter( 'login_redirect', function( $redirect_to, $request, $user ) {
+//     // Отправляем строго на главную (http://localhost:8080/), минуя кривой маршрут
+//     return home_url('/'); 
+// }, 99, 3 );
+
+
 ?>

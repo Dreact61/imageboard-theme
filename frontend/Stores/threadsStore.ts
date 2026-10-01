@@ -184,9 +184,8 @@ const storeThreads = create<Store_Threads>((set, get) => ({
             set({error: null, loading: true, log: null})
             const res = await axios.post(`${CUSTOM_API}/threads/delete`, {id}, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-            
-            const thread = res.data.thread_id
 
+            set({currentThread: null, currentThreadPosts: []})
             return {
                 success: res.data.success,
                 msg: 'Тред успешно удален',
