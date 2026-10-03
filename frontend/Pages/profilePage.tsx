@@ -1,10 +1,13 @@
 import type { User } from "../../types"
 
+
 import { useSyncExternalStore, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 
+
 import storeUsers from "../Stores/userStore"
-import { _body, _hypertext, _text_loading, _text_error, _text_info, _main, _section, _borders, _bio, _bio_cont, _button_cont, _button, _profiles_body, _profiles_btn_cont, _profiles_btn } from "../style-presets"
+import { ui } from "../style-presets"
+
 
 export default function ProfilePage() {
     //NAVIGATION && PARAMS
@@ -19,8 +22,10 @@ export default function ProfilePage() {
     const [status, setStatus] = useState(0)
     const [user, setUser] = useState({} as User)
 
+
     useEffect(() => {
         if (!user_id) return
+
 
         const handleAsyncParse = async () => {
             setIsFetching(true)
@@ -30,9 +35,11 @@ export default function ProfilePage() {
             const user = log.data
             setUser(user as User || null)
 
+
             setIsFetching(false)
             setStatus(log.status)
         }
+
 
         handleAsyncParse()
     }, [user_id, fetchThisUser])
@@ -41,45 +48,57 @@ export default function ProfilePage() {
     let mainContent:any
     if (loading || isFetching) {
         mainContent = 
-        <div className={_body}>
-            <p className={_text_loading}>Загрузка...</p>
-            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+        <div className={ui.loadingPage}>
+            <p className={ui.loadingText}>Загрузка...</p>
+            <small><Link className={ui.link} to="/">Вернуться назад</Link></small>
         </div>
     } else if (error || !user) {
         mainContent =
-        <div className={_body}>
-            <p className={_text_error}>Ошибка {status}</p>
-            <small className={_text_info}>{error ? error : 'Что-то пошло не так. Попробуйте перезагрузить страницу или зайти позже.'}</small>
-            <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+        <div className={ui.errorPage}>
+            <p className={ui.errorTitle}>Ошибка {status}</p>
+            <small className={ui.errorText}>{error ? error : 'Что-то пошло не так. Попробуйте перезагрузить страницу или зайти позже.'}</small>
+            <small><Link className={ui.link} to="/">Вернуться назад</Link></small>
         </div>
     } else {
         mainContent = 
-        <div className={_profiles_body}>
-            <main className={`${_main} w-1/3`}>
-                <section className={_section}>
-                    <strong>Профиль Пользователя</strong>
-                </section>
+        <div className={`${ui.page} flex items-center justify-center`}>
+            <div className="flex w-full max-w-4xl flex-col items-center gap-5">
+                <main className={`${ui.card} w-full md:w-2/3`}>
+                    <section className={`${ui.threadInfo} mb-5 rounded-md`}>
+                        <strong className={ui.threadTitle}>Профиль Пользователя</strong>
+                    </section>
 
-                <section className={_section}>
-                    <strong>Имя: {user.username}</strong>
 
-                    <div className={_bio_cont}>
-                        <b>Описание</b>
-                        <p className={_bio}>{user.description || 'Нет описания.'}</p>
+                    <section className={ui.threadInfo}>
+                        <strong className={ui.author}>Имя: {user.username}</strong>
+
+
+                        <div className="mt-5 flex w-full flex-col items-start gap-2">
+                            <b className={ui.text}>Описание</b>
+                            <p className={`${ui.surface} w-full p-3 text-left text-text-main`}>
+                                {user.description || 'Нет описания.'}
+                            </p>
+                        </div>
+
+
+                    </section>
+
+                    <small className={`${ui.metadata} mt-4 text-[16px] ${user.role === 'user' ? 'text-indigo-300' : 'text-purple-300'}`}>
+                        Роль: {user.role === 'admin' ? 'Администратор' : 'Пользователь'}
+                    </small>
+                </main>
+
+
+                <section className={`${ui.card} w-full md:w-2/3`}>
+                    <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+                        <button type="button" onClick={() => navigate('/reports')} className={ui.button}>Пожаловаться</button>
+                        <button type="button" onClick={() => navigate('/')} className={ui.button}>Назад</button>
                     </div>
-
                 </section>
-                <small className={user.role === 'user' ? `text-[#a4acff] text-[16px]` : 'text-[#a36aff] text-[16px]'}>Роль: {user.role === 'admin' ? 'Администратор' : 'Пользователь'}</small>
-            </main>
-
-            <section className={`${_main} w-1/3`}>
-                <div className={_profiles_btn_cont}>
-                    <button type="button" onClick={() => navigate('/reports')} className={_profiles_btn}>Пожаловаться</button>
-                    <button type="button" onClick={() => navigate('/')} className={_profiles_btn}>Назад</button>
-                </div>
-            </section>
+            </div>
         </div>
     }
+
 
     return mainContent
 }

@@ -8,7 +8,7 @@ const getAxiosConfig = () => {
     return {
         withCredentials: true,
         headers: {
-            'Content-Type': 'application/json' as const,
+            'Content-Type': 'application/json' as const
         }
     } satisfies AxiosRequestConfig
 }
@@ -27,7 +27,7 @@ const storeBoards = create<Store_Boards>((set, get) => ({
 
             const res = await axios.get(`${CUSTOM_API}/boards/all`)
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-
+                
             const boards:Board[] = res.data.boards
 
             const result_log = {

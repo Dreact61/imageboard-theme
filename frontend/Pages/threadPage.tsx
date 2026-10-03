@@ -2,12 +2,14 @@ import React, { useEffect, useState, useSyncExternalStore } from "react"
 import { useNavigate, useParams, Link } from "react-router"
 import storeThreads from "../Stores/threadsStore"
 
+
 import { ui } from "../style-presets"
 import Header from "../Parts/header"
 import Footer from "../Parts/footer"
 import storeUsers from "../Stores/userStore"
 import storePosts from "../Stores/postsStore"
 import { Post } from "../../types"
+
 
 export default function ThreadPage() {
     //NAVIGATION && PARAMS
@@ -20,11 +22,13 @@ export default function ThreadPage() {
     const currentThreadPosts = useSyncExternalStore(storeThreads.subscribe, () => storeThreads.getState().currentThreadPosts, () => [])
     const fetchThisThread = storeThreads.getState().fetchThisThread
     const deleteThread = storeThreads.getState().deleteThread
-    
+
     const dynamicPostAddition = storeThreads.getState().dynamicPostAddition
     const dynamicPostDeletion = storeThreads.getState().dynamicPostDeletion
 
+
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
+
 
     const createPost = storePosts.getState().createPost
     const deletePost = storePosts.getState().deletePost
@@ -33,29 +37,37 @@ export default function ThreadPage() {
     const [status, setStatus] = useState(0)
     const [msg, setMsg] = useState('')
 
+
     const [postContent, setPostContent] = useState('')
     const [postContentErr, setPostContentErr] = useState('')
+
 
     const [toDelete, setToDelete] = useState(false)
     const [postToDelete, setPostToDelete] = useState(false)
 
+
     useEffect(() => {
         if (!thread_id || !board_mark) return
+
 
         const handleAsyncParse = async () => {
             setIsFetching(true)
 
+
             const IDAsNum = Number(thread_id)
             const log = await fetchThisThread(IDAsNum)
+
 
             if (!log.success) {
                 setStatus(log.status)
                 setMsg(log?.msg || 'error_unknown')
             }
 
+
             setIsFetching(false)
         }
         handleAsyncParse()
+
 
         console.log(currentThread)
     }, [thread_id, board_mark])
@@ -64,13 +76,16 @@ export default function ThreadPage() {
         e.preventDefault()
         if (!currentThread || !currentThread.id) return
 
+
         const data = {
             content: postContent,
             author: currentUser?.username || 'Аноним',
             parent: currentThread.id
         }
 
+
         const log = await createPost(data)
+
 
         if (!log.success) {
             setPostContentErr(log.msg || 'Непредвиденная ошибка.')
@@ -79,18 +94,22 @@ export default function ThreadPage() {
             dynamicPostAddition(log.data as Post)
         }
 
+
         return
     }
     useEffect(() => {
         fetchThisThread
     }, [currentThreadPosts])
 
+
     const handleThreadDeletion = async () => {
         if (toDelete) {
             if (!currentThread || !currentThread.id) return
             const threadId = currentThread.id
 
+
             const log = await deleteThread(threadId)
+
 
             if (log.success) {
                 alert('Тред был успешно удален.')
@@ -105,11 +124,14 @@ export default function ThreadPage() {
         return
     }
 
+
     const handlePostDeletion = async (id: any) => {
         if (postToDelete) {
             if (!id) return
 
+
             const log = await deletePost(id)
+
 
             if (log.success) {
                 alert('Пост удален.')
@@ -127,73 +149,82 @@ export default function ThreadPage() {
     let mainContent: any
     if (isFetching) {
         mainContent =
-            <div className={_body}>
-                <p className={_text_loading}>Загрузка...</p>
-                <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+            <div className={ui.loadingPage}>
+                <p className={ui.loadingText}>Загрузка...</p>
+                <small><Link className={ui.link} to="/">Вернуться назад</Link></small>
             </div>
     } else if (!currentThread || error && !isFetching) {
         mainContent =
-            <div className={_body}>
-                <p className={_text_error}>Ошибка {status}</p>
-                <small className={_text_info}>{error || msg || 'Перепроверьте адрес. Возможно вы написали его с ошибкой.'}</small>
-                <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+            <div className={ui.errorPage}>
+                <p className={ui.errorTitle}>Ошибка {status}</p>
+                <small className={ui.errorText}>{error || msg || 'Перепроверьте адрес. Возможно вы написали его с ошибкой.'}</small>
+                <small><Link className={ui.link} to="/">Вернуться назад</Link></small>
+
 
                 <p className="bg-[#30284b71] "></p>
             </div>
     } else {
         mainContent =
-            <div className={_profiles_body}>
-                <Header />
+            <div className={ui.page}>
+                <div className={ui.content}>
+                    <Header />
 
-                {currentUser && (currentThread.author === currentUser?.username || currentUser.role === 'admin')
-                    ?
-                    <section className={`${_borders} flex flex-row w-1/2 items-center justify-around p-4 gap-8 `}>
-                        <button type="button" className={ui.button} onClick={() => navigate(`/boards/${board_mark}/threads/${thread_id}/edit`)} disabled={loading}>Редактировать тред</button>
-                        <button type="button" className={ui.deleteButton} onClick={handleThreadDeletion} disabled={loading}>Удалить тред</button>
-                    </section>
-                    : ''
-                }
 
-                <main className={_main}>
-                    <section className={_section}>
-                        <strong>{currentThread.name} ({currentThread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</strong>
-                        <p className="text-[18px] py-2">{currentThread.description}</p>
-                        <small className={`${_text_info} py-2 text-[16px]`}>Автор:{currentThread.author}</small>
-                        <small className={`${_text_info} text-[16px]`}>Время создания: {currentThread.createdAt}</small>
-                    </section>
+                    {currentUser && (currentThread.author === currentUser?.username || currentUser.role === 'admin')
+                        ?
+                        <section className={ui.headerActions}>
+                            <button type="button" className={ui.button} onClick={() => navigate(`/boards/${board_mark}/threads/${thread_id}/edit`)} disabled={loading}>Редактировать тред</button>
+                            <button type="button" className={ui.deleteButton} onClick={handleThreadDeletion} disabled={loading}>Удалить тред</button>
+                        </section>
+                        : ''
+                    }
 
-                    <section className={`${_section} gap-4 px-2`}>
-                        {currentThreadPosts && currentThreadPosts.length !== 0
-                            ? currentThreadPosts.map(post => (
-                                <div className={`bg-[#3f229e3a]rounded-md border-[#432f92] grid grid-cols-1 justify-center items-center p-3 border-2 w-3/4 text-[16px]`} key={post.id}>
-                                    <h2 className={`${_text} font-black pb-2 text-[20px] text-left`}>{post.author || 'Аноним'} - ({post.createdAt})</h2>
-                                    
-                                    <div className="flex gap-4">
-                                        <img className={_img} src={(post.image as string) || 'imageboard-theme/public/pictures/ico.png'} alt="Image" />
-                                        <b className="text-left">{post.content}</b>
+
+                    <main className={ui.main}>
+                        <section className={ui.threadInfo}>
+                            <strong className={ui.threadTitle}>{currentThread.name} ({currentThread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</strong>
+                            <p className={ui.description}>{currentThread.description}</p>
+                            <small className={ui.metadata}>Автор:{currentThread.author}</small>
+                            <small className={ui.metadata}>Время создания: {currentThread.createdAt}</small>
+                        </section>
+
+
+                        <section className={ui.posts}>
+                            {currentThreadPosts && currentThreadPosts.length !== 0
+                                ? currentThreadPosts.map(post => (
+                                    <div className={ui.post} key={post.id}>
+                                        <h2 className={ui.author}>{post.author || 'Аноним'} - ({post.createdAt})</h2>
+
+                                        <div className={ui.postBody}>
+                                            <img className={ui.avatar} src={(post.image as string) || '/pictures/ico.png'} alt="Image" />
+                                            <b className={ui.postText}>{post.content}</b>
+                                        </div>
+                                        {post.author === currentUser?.username || currentThread.author === currentUser?.username
+                                            ? <button className={ui.deleteButton} onClick={() => handlePostDeletion(post.id)} type="button">Удалить</button>
+                                            : ''
+                                        }
                                     </div>
-                                    {post.author === currentUser?.username || currentThread.author === currentUser?.username
-                                        ? <button className={`${_profiles_btn} mt-2 text-center w-1/2`} onClick={() => handlePostDeletion(post.id)} type="button">Удалить</button>
-                                        : ''
-                                    }
-                                </div>
-                            ))
-                            : <p className={_text_info}>У этого треда пока нет постов.</p>
-                        }
-                    </section>
+                                ))
+                                : <p className={ui.empty}>У этого треда пока нет постов.</p>
+                            }
+                        </section>
 
-                    <section className={_button_cont}>
-                        <button type="button" onClick={() => navigate(-1)} className={_button}>Назад</button>
-                    </section>
-                </main>
 
-                <form onSubmit={(e) => handleMessageSending(e)} className={_messaging_cont}>
-                    <input type="text" placeholder="Написать..." id="message" className={_inputField} value={postContent} onChange={(e) => setPostContent(e.target.value)} required />
-                    <button type="submit" className={_button}>Отправить</button>
-                    {postContentErr && <p className={_text_error}>{postContentErr}</p>}
-                </form>
+                        <section className={ui.bottomActions}>
+                            <button type="button" onClick={() => navigate(-1)} className={ui.button}>Назад</button>
+                        </section>
+                    </main>
 
-                <Footer />
+
+                    <form onSubmit={(e) => handleMessageSending(e)} className={ui.composer}>
+                        <input type="text" placeholder="Написать..." id="message" className={ui.input} value={postContent} onChange={(e) => setPostContent(e.target.value)} required />
+                        <button type="submit" className={ui.button}>Отправить</button>
+                        {postContentErr && <p className={ui.error}>{postContentErr}</p>}
+                    </form>
+
+
+                    <Footer />
+                </div>
             </div>
     }
     return mainContent

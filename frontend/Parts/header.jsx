@@ -9,7 +9,7 @@ export default function Header() {
     return (
         <header className={`${ui.card} w-full max-w-5xl`}>
             <div className="flex-row flex w-full items-center justify-around border-b-2 border-[#3f2b8a] pb-2">
-                <h2 className="text-2xl">D-Chan</h2>
+                <h2 className="text-2xl"><Link to="/">D-Chan</Link></h2>
                 <p>{currentUser ? <Link  className={ui.link} to={`/my-profile`}>{currentUser.username}</Link> : <Link to="/register" className={ui.link}>Регистрация</Link>}</p>
             </div>
             <img className={ui.img} src="/imageboard-theme/public/pictures/ico.png" alt="D-ch logo" />

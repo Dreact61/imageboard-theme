@@ -1,5 +1,5 @@
 import { ui } from "../style-presets";
-
+import { Link } from "react-router";
 
 export default function Footer() {
     return (
@@ -9,20 +9,20 @@ export default function Footer() {
             </section>
 
             <section className="flex flex-col items-center justify-center">
-                <ul className="grid w-full grid-cols-2 gap-2 text-center text-sm text-text-muted sm:grid-cols-4">
-                    <li>• list</li>
-                    <li>• list</li>
-                    <li>• list</li>
-                    <li>• list</li>
-                    <li>• list</li>
-                    <li>• list</li>
-                    <li>• list</li>
-                    <li>• list</li>
+                <ul className={ui.footerLinks}>
+                    <li>• <Link to="/" className={ui.link}>Главная страница</Link></li>
+                    <li>• <Link to="/register" className={ui.link}>Регистрация аккаунта</Link></li>
+                    <li>• <Link to="/my-profile" className={ui.link}>Мой профиль</Link></li>
+                    <li>• <Link to="/boards/create" className={ui.link}>Создайте собственную доску</Link></li>
+
+                    <li>• <Link to="/rules" className={ui.link}>Правила пользования сайта</Link></li>
+                    <li>• <Link to="/login" className={ui.link}>Вход в аккаунт</Link></li>
+                    <li>• <Link to="/my-profile/edit" className={ui.link}>Редактировать профиль</Link></li>
                 </ul>
             </section>
 
-            <section className="mt-4 text-center text-text-muted">
-                links
+            <section className={`${ui.muted} mt-4 text-center text-text-muted`}>
+                (Здесь ссылки на соцсети проекта и пр.)
             </section>
         </footer>
     )

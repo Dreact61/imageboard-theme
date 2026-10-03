@@ -291,6 +291,14 @@ export const ui = {
         px-4 py-5
     `,
 
+    topActions: `
+        flex justify-center
+        w-full
+        items-center justify-around
+        border-b-2 border-[#261F3D]/50
+        px-4 py-5
+    `,
+
     // Форма отправки
     composer: `
         ${surface}
@@ -322,9 +330,12 @@ export const ui = {
 
     // Отдельные элементы страниц
 
-    header: `
-        ${surface}
-        flex flex-col
-        w-full
-    `,
+    footerLinks: `
+        grid justify-grid-cols-2
+        text-sm text-left text-text-muted sm:grid-cols-4
+        w-full gap-2
+        items-center justify-around
+        border-y-2 border-[#261F3D]/50
+        px-4 py-5
+    `
 }
