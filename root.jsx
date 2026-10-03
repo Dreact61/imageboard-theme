@@ -15,6 +15,7 @@ import ThreadPage from "./frontend/Pages/threadPage";
 import EditBoardPage from "./frontend/Pages/editBoardPage";
 import EditThreadPage from "./frontend/Pages/editThreadPage";
 import PrivateThreadPasswordPage from "./frontend/Pages/PrivateThreadPasswordPage";
+import RulesPage from "./frontend/Pages/rulesPage";
 
 document.addEventListener('DOMContentLoaded', () => {
   createRoot(document.getElementById('root')).render(
@@ -37,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <Route path="/register" element={<RegisterPage />}></Route>
                 <Route path="/login" element={<LoginPage />}></Route>
                 <Route path="/users/:user_id" element={<ProfilePage />}></Route>
+
+                <Route path="/rules" element={<RulesPage />}></Route>
             </Routes>
         </BrowserRouter>
     </StrictMode>

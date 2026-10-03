@@ -1,8 +1,9 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useNavigate, useParams, Link } from "react-router";
 import storeThreads from "../Stores/threadsStore";
-import { _main, _profiles_body, _profiles_btn_cont, _section, _body, _text_error, _text_info, _text_loading, _inputField, _form_items_grid, _hypertext, _profiles_btn } from "../style-presets";
+import { ui } from "../style-presets";
 import storeUsers from "../Stores/userStore";
+
 
 export default function PrivateThreadPasswordPage() {
     //NAVIGATION && PARAMS
@@ -15,29 +16,36 @@ export default function PrivateThreadPasswordPage() {
     const fetchThisThread = storeThreads.getState().fetchThisThread
     const handlePrivateThreadLogIn = storeThreads.getState().handlePrivateThreadLogin
 
+
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
     //STATES
     const [isFetching, setIsFetching] = useState(true)
     const [status, setStatus] = useState(0)
     const [msg, setMsg] = useState('')
 
+
     const [password, setPassword] = useState('')
+
 
     useEffect(() => {
         if (!board_mark || !thread_id) return
 
+
         const handleAsyncParse = async () => {
             setIsFetching(true)
+
 
             const IDAsNum = Number(thread_id)
             if (!currentThread) {
                 const log = await fetchThisThread(IDAsNum)
+
 
                 if (!log.success) {
                     setMsg(log.msg || 'error_unknown')
                     setStatus(log.status)
                 }
             }
+
 
             setIsFetching(false)
         }
@@ -49,7 +57,9 @@ export default function PrivateThreadPasswordPage() {
         e.preventDefault()
         if (!currentThread || currentThread.password) return
 
+
         const log = await handlePrivateThreadLogIn(Number(thread_id), String(password))
+
 
         if (log.success) {
             navigate(`/boards/${board_mark}/threads/${thread_id}`, { preventScrollReset: true })
@@ -64,38 +74,42 @@ export default function PrivateThreadPasswordPage() {
     //RENDER
     if (isFetching) {
         return (
-            <div className={_body}>
-                <p className={_text_loading}>Загрузка...</p>
-                <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+            <div className={ui.loadingPage}>
+                <p className={ui.loadingText}>Загрузка...</p>
+                <small><Link className={ui.link} to="/">Вернуться назад</Link></small>
             </div>
         )
     } else if (!currentThread && !isFetching) {
         return (
-            <div className={_body}>
-                <p className={_text_error}>Ошибка {status}</p>
-                <small className={_text_info}>{error || msg || 'Перепроверьте адрес. Возможно вы написали его с ошибкой.'}</small>
-                <small><Link className={_hypertext} to="/">Вернуться назад</Link></small>
+            <div className={ui.errorPage}>
+                <p className={ui.errorTitle}>Ошибка {status}</p>
+                <small className={ui.errorText}>{error || msg || 'Перепроверьте адрес. Возможно вы написали его с ошибкой.'}</small>
+                <small><Link className={ui.link} to="/">Вернуться назад</Link></small>
             </div>
         )
     } else if (currentThread && currentThread.status === 'PUBLIC') {
         navigate(`boards/${board_mark}/threads/${thread_id}`)
     } else {
         return (
-            <div className={_profiles_body}>
-                <form className={_main} onSubmit={(e) => handlePrivateThreadLogin(e)}>
-                    <section className={_section}>
-                        <strong>Этот тред приватный</strong>
-                        <small>Тред, на который вы хотите попасть, является приватным. Вам придется ввести оставленный владельцем пароль для входа в тред.</small>
+            <div className={`${ui.page} flex items-center justify-center`}>
+                <form className={`${ui.card} w-full max-w-2xl`} onSubmit={(e) => handlePrivateThreadLogin(e)}>
+                    <section className={`${ui.threadInfo} mb-5 rounded-md`}>
+                        <strong className={ui.threadTitle}>Этот тред приватный</strong>
+                        <small className={`${ui.description} mt-3`}>
+                            Тред, на который вы хотите попасть, является приватным. Вам придется ввести оставленный владельцем пароль для входа в тред.
+                        </small>
                     </section>
 
-                    <section className={_form_items_grid}>
-                        <label htmlFor="password">Пароль</label>
-                        <input type="password" name="" id="password" className={_inputField} required value={password} onChange={(e) => setPassword(e.target.value)} />
+
+                    <section className="grid w-full grid-cols-1 items-center gap-4 sm:grid-cols-2">
+                        <label htmlFor="password" className={ui.text}>Пароль</label>
+                        <input type="password" name="" id="password" className={ui.input} required value={password} onChange={(e) => setPassword(e.target.value)} />
                     </section>
 
-                    <section className={_profiles_btn_cont}>
-                        <button type="submit" disabled={loading} className={_profiles_btn}>Подтвердить</button>
-                        <button type="button" disabled={loading} onClick={() => navigate(-1)} className={_profiles_btn}>Назад</button>
+
+                    <section className="mt-5 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+                        <button type="submit" disabled={loading} className={ui.button}>Подтвердить</button>
+                        <button type="button" disabled={loading} onClick={() => navigate(-1)} className={ui.button}>Назад</button>
                     </section>
                 </form>
             </div>

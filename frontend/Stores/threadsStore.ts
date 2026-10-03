@@ -184,9 +184,8 @@ const storeThreads = create<Store_Threads>((set, get) => ({
             set({error: null, loading: true, log: null})
             const res = await axios.post(`${CUSTOM_API}/threads/delete`, {id}, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-            
-            const thread = res.data.thread_id
 
+            set({currentThread: null, currentThreadPosts: []})
             return {
                 success: res.data.success,
                 msg: 'Тред успешно удален',
@@ -239,7 +238,40 @@ const storeThreads = create<Store_Threads>((set, get) => ({
         } finally {
             set({loading:false})
         }
-    }
+    },
+
+    handleThreadPasswordOutput: async (id) => {
+        try {
+            set({error: null, loading: true, log: null})
+            const res = await axios.post(`${CUSTOM_API}/threads/password`, {id}, getAxiosConfig())
+            if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
+
+            return {
+                success: res.data.success,
+                msg: 'Тред успешно удален',
+                status: res.status,
+                data: res.data.password
+            }
+        } catch(err:any) {
+            const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
+            console.error(errorMsg)
+            const Log = {
+                    success: false,
+                    msg: errorMsg,
+                    status: err.response?.status || 500,
+                }
+            set({
+                error: errorMsg,
+                log: Log
+            })
+            return Log
+        } finally {
+            set({loading:false})
+        }
+    },
+
+    dynamicPostAddition: async (post) => set((state) => ({currentThreadPosts: [...state.currentThreadPosts, post]})),
+    dynamicPostDeletion: async (id) => set((state) => ({currentThreadPosts: state.currentThreadPosts.filter(post => post.id !== id)}))
 }))
 
 export default storeThreads

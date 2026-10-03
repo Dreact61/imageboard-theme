@@ -87,6 +87,10 @@ export type Store_Threads = {
     editThread: (id: number, data: ThreadRequest) => Promise<Log>,
     deleteThread: (id: number) => Promise<Log>,
     handlePrivateThreadLogin: (id: number, password: string) => Promise<Log>
+
+    handleThreadPasswordOutput: (id: number) => Promise<Log>
+    dynamicPostAddition: (post: Post) => Promise<void>
+    dynamicPostDeletion: (id: number) => Promise<void>
 }
 
 //=========================
@@ -98,7 +102,18 @@ export type Post = {
     content: string,
     author: string | 'Аноним',
     createdAt?: string,
-    parent: number // Thread.id
+    parent: number // Thread.id,
+    image?: Blob | string
+}
+
+export type PostRequest = {
+    content: string,
+    author: string | "Аноним",
+    parent: number,
+    FormData: {
+        image_file?: Blob | null,
+        image_url?: string | null
+    }
 }
 
 export type Store_Posts = {

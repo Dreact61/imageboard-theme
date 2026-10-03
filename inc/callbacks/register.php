@@ -91,17 +91,13 @@ function handle_user_edit(WP_REST_Request $request) {
     $has_changes = false;
 
     if (isset($params['username']) && $params['username'] !== $current_user->user_nicename) {
-        $userdata['user_nicename'] = $params['username'];
+        $userdata['user_nicename'] = sanitize_user($params['username']);
         $has_changes = true;
-    } else {
-        $userdata['user_nicename'] = $current_user->user_nicename;
     }
 
     if (isset($params['description']) && $params['description'] !== $current_user->description) {
-        $userdata['description'] = $params['description'];
+        $userdata['description'] = sanitize_text_field($params['description']);
         $has_changes = true;
-    } else {
-        $userdata['description'] = $current_user->description;
     }
 
     if (!empty($params['password'])) {
@@ -110,35 +106,26 @@ function handle_user_edit(WP_REST_Request $request) {
             $userdata['user_pass'] = $params['password'];
             $has_changes = true;
         }
-    } else {
-        $userdata['user_pass'] = $current_user->user_pass;
     }
 
-
     if (!$has_changes) {
-        return new WP_REST_Response([
-            "success" => true,
-            "user" => null
-        ], 204);
+        return new WP_REST_Response(204);
     }
 
     $apply = wp_update_user($userdata);
     if (is_wp_error($apply)) {
-        return new WP_Error(
-            'server_error', 
-            'Ошибка на стороне сервера', 
-            [
-                "status" => 500,
-                "success" => false,
-                "details" => $apply->get_error_message(),
-            ]);
+        return new WP_Error('server_error', 'Ошибка на стороне сервера', [
+            "status" => 500,
+            "success" => false,
+            "details" => $apply->get_error_message(),
+        ]);
     }
 
     $updated_user = get_userdata($user_id);
     return new WP_REST_Response([
         "success" => true,
         "user" => [
-            'id' => $params['id'],
+            'id' => $updated_user->ID,
             'username' => $updated_user->user_nicename,
             'description' => $updated_user->description
         ]
@@ -146,10 +133,10 @@ function handle_user_edit(WP_REST_Request $request) {
 }
 
 function handle_user_deletion(WP_REST_Request $request) {
-    require_once ABSPATH . 'wp-admin/includes/user.php'; // импорт для wp_delete_user()
+    require_once ABSPATH . 'wp-admin/includes/user.php'; //wp_delete_user()
     $id = $request->get_param('id');
 
-    $delete = wp_delete_user($id, null); // вот тут оно применяется
+    $delete = wp_delete_user($id, null);
     if(!$delete) {
         return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500, "success" => false]);
     }

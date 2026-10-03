@@ -9,10 +9,10 @@
         "checkJs": false,
         "noEmit": true
     },
-    "include": ["**/*"],
+    "include": ["**/*", "imageboard-theme/*", "../*", "./*"],
     "exclude": [
         "node_modules",
         "vendor",
         "build"
-    ]
+    ] 
 }
