@@ -84,14 +84,6 @@
             'callback' => 'handle_user_edit',
             'permission_callback' => 'mw_can_edit_user',
             'args' => [
-                'username' => [
-                    'type' => 'string',
-                    'required' => false,
-                    'sanitize_callback' => 'sanitize_text_field',
-                    'validate_callback' => function($param) {
-                        return (is_string($param) && mb_strlen($param) >= 4) || is_null($param);
-                    }
-                ],
                'description' => [
                     'type' => 'string',
                     'required' => false,

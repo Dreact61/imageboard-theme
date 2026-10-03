@@ -90,11 +90,6 @@ function handle_user_edit(WP_REST_Request $request) {
 
     $has_changes = false;
 
-    if (isset($params['username']) && $params['username'] !== $current_user->user_nicename) {
-        $userdata['user_nicename'] = sanitize_user($params['username']);
-        $has_changes = true;
-    }
-
     if (isset($params['description']) && $params['description'] !== $current_user->description) {
         $userdata['description'] = sanitize_text_field($params['description']);
         $has_changes = true;

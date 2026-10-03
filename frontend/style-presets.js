@@ -270,7 +270,6 @@ export const ui = {
 
     deleteButton: `
         ${interactive}
-        mx-4 mb-4
         rounded-md
         border
         border-red-400/30
@@ -310,7 +309,6 @@ export const ui = {
         p-3
         shadow-[0_8px_30px_rgba(0,0,0,0.5)]
         backdrop-blur-md
-        sm:flex-row
     `,
 
     input: `
@@ -337,5 +335,15 @@ export const ui = {
         items-center justify-around
         border-y-2 border-[#261F3D]/50
         px-4 py-5
+    `,
+
+    img: `
+        w-inherit h-fit 
+        border-2 border-[#261F3D]
+        disabled:cursor-not-allowed
+        disabled:opacity-50
+        placeholder:text-[#E2E0E7]/40
+        flex-1
+        bg-cover
     `
 }

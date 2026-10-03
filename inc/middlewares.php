@@ -87,16 +87,17 @@ function mw_is_board_owner(WP_REST_Request $req)
         );
     }
     $board_author = get_post_meta($board->ID, 'board_author', true);
+    $current_username = get_userdata(get_current_user_id())->user_nicename;
 
-    if ($board_author === get_current_user_id()) {
-        return true;
+    if ($board_author !== $current_username) {
+        return new WP_Error(
+            'rest_forbidden',
+            'Вы не являетесь создателем данной доски.',
+            ['status' => 403]
+        );
     }
 
-    return new WP_Error(
-        'rest_forbidden',
-        'Вы не являетесь создателем данной доски.',
-        ['status' => 403]
-    );
+    return true;
 }
 
 // Может ли юзер редачить тред?
@@ -117,12 +118,13 @@ function mw_is_thread_owner(WP_REST_Request $req)
         );
     }
 
-    $author_name = get_post_meta($thread_id, 'thread_author', true);
+    $thread_author = get_post_meta($thread_id, 'thread_author', true);
+    $current_username = get_userdata(get_current_user_id())->user_nicename;
 
-    if ($author_name === get_current_user_id()) {
+    if ($current_username === $thread_author) {
         return true;
     }
-
+    
     return new WP_Error(
         'rest_forbidden',
         'Вы не явялетесь автором данного треда.',

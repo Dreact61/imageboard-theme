@@ -95,7 +95,7 @@ export default function ThreadCreationPage() {
 
                 <section className="flex w-full items-center justify-evenly gap-4">
                     <button type="submit" disabled={loading} className={ui.button}>Создать</button>
-                    <Link to='/'>
+                    <Link to={`/boards/${board_mark}`}>
                         <button type="button" disabled={loading} className={ui.button}>Назад</button>
                     </Link>
                 </section>

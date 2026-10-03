@@ -6,6 +6,12 @@ export type User = {
     password?: string | null
 }
 
+export type UserRequest = {
+    description: string | null,
+    password: string | null,
+    id?: number
+}
+
 export type Store_Users = {
     error: string | null,
     loading: boolean,
@@ -15,7 +21,7 @@ export type Store_Users = {
     register: (data:User) => Promise<Log>,
     login: (username: string, password: string) => Promise<Log>,
     logout: () => Promise<void>,
-    editUser: (data:User) => Promise<Log>,
+    editUser: (data:UserRequest) => Promise<Log>,
     deleteUser: (id: number) => Promise<Log>
 }
 
@@ -103,7 +109,7 @@ export type Post = {
     author: string | 'Аноним',
     createdAt?: string,
     parent: number // Thread.id,
-    image?: Blob | string
+    image?: Blob | string | null
 }
 
 export type PostRequest = {
@@ -113,7 +119,7 @@ export type PostRequest = {
     FormData: {
         image_file?: Blob | null,
         image_url?: string | null
-    }
+    } | null
 }
 
 export type Store_Posts = {

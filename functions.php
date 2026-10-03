@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-add_action('wp_enqueue_scripts', function() {
+add_action('wp_enqueue_scripts', function () {
     wp_enqueue_script(
         'imageboard-proj',
         get_template_directory_uri() . '/build/index.js',
@@ -12,12 +12,17 @@ add_action('wp_enqueue_scripts', function() {
         true
     );
 
-    wp_localize_script('imageboard-proj', 'wpApiSettings', array(
-        'nonce' => wp_create_nonce('wp_rest')
-    ));
-
+    wp_localize_script(
+        'imageboard-proj',
+        'wpApiSettings',
+        [
+            'theme_url' => get_template_directory_uri(),
+            'nonce' => wp_create_nonce('wp_rest')
+        ]
+    );
+    
     $css_path = 'build/output.css';
-    if(file_exists(get_theme_file_path($css_path))) {
+    if (file_exists(get_theme_file_path($css_path))) {
         wp_enqueue_style(
             'theme-tailwind',
             get_theme_file_uri($css_path),
@@ -26,6 +31,7 @@ add_action('wp_enqueue_scripts', function() {
             filemtime(get_theme_file_path($css_path))
         );
     }
+
 });
 
 require_once __DIR__ . "/inc/roles.php";
@@ -41,10 +47,11 @@ require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/inc/jwt-helper.php";
 require_once __DIR__ . "/inc/middlewares.php";
 
-add_filter('allowed_redirect_hosts', function($hosts) {
+add_filter('allowed_redirect_hosts', function ($hosts) {
     $hosts[] = 'localhost:8080';
     return $hosts;
 });
+
 
 //-----
 
@@ -63,6 +70,3 @@ add_filter('allowed_redirect_hosts', function($hosts) {
 //     }
 // }
 // add_action('init', 'single_time_delete_all_cpt_boards');
-
-
-?>

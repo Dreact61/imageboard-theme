@@ -4,7 +4,6 @@ import storeThreads from "../Stores/threadsStore";
 import { ui } from "../style-presets";
 import storeUsers from "../Stores/userStore";
 
-
 export default function PrivateThreadPasswordPage() {
     //NAVIGATION && PARAMS
     const navigate = useNavigate()
@@ -16,36 +15,29 @@ export default function PrivateThreadPasswordPage() {
     const fetchThisThread = storeThreads.getState().fetchThisThread
     const handlePrivateThreadLogIn = storeThreads.getState().handlePrivateThreadLogin
 
-
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
     //STATES
     const [isFetching, setIsFetching] = useState(true)
     const [status, setStatus] = useState(0)
     const [msg, setMsg] = useState('')
 
-
     const [password, setPassword] = useState('')
-
 
     useEffect(() => {
         if (!board_mark || !thread_id) return
 
-
         const handleAsyncParse = async () => {
             setIsFetching(true)
-
 
             const IDAsNum = Number(thread_id)
             if (!currentThread) {
                 const log = await fetchThisThread(IDAsNum)
-
 
                 if (!log.success) {
                     setMsg(log.msg || 'error_unknown')
                     setStatus(log.status)
                 }
             }
-
 
             setIsFetching(false)
         }
@@ -55,18 +47,19 @@ export default function PrivateThreadPasswordPage() {
     let attempts = 0
     const handlePrivateThreadLogin = async (e: React.SubmitEvent) => {
         e.preventDefault()
-        if (!currentThread || currentThread.password) return
-
-
-        const log = await handlePrivateThreadLogIn(Number(thread_id), String(password))
-
+        if (!currentThread || !password) return
+        const log = await handlePrivateThreadLogIn(Number(thread_id), password)
 
         if (log.success) {
             navigate(`/boards/${board_mark}/threads/${thread_id}`, { preventScrollReset: true })
+            setPassword('')
         } else {
             alert(log.msg || 'error_unknown')
-            if (attempts === 3) navigate('/')
             attempts++
+            if (attempts >= 3) {
+                navigate('/')
+            }
+            console.log(log.data)
         }
         return
     }
@@ -100,12 +93,10 @@ export default function PrivateThreadPasswordPage() {
                         </small>
                     </section>
 
-
-                    <section className="grid w-full grid-cols-1 items-center gap-4 sm:grid-cols-2">
+                    <section className="grid w-full grid-cols-1 items-center text-center gap-4 sm:grid-cols-2">
                         <label htmlFor="password" className={ui.text}>Пароль</label>
                         <input type="password" name="" id="password" className={ui.input} required value={password} onChange={(e) => setPassword(e.target.value)} />
                     </section>
-
 
                     <section className="mt-5 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
                         <button type="submit" disabled={loading} className={ui.button}>Подтвердить</button>

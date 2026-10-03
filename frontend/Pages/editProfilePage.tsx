@@ -11,19 +11,15 @@ export default function EditProfilePage() {
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
     const editUser = storeUsers.getState().editUser
     //STATES
-    const currentName = currentUser?.username
     const currentDesc = currentUser?.description
     const currentPassword = currentUser?.password
 
-
-    const [name, setName] = useState('')
     const [desc, setDesc] = useState('')
     const [pass, setPass] = useState('')
 
 
     useEffect(() => {
         if (!currentUser?.username) return
-        setName(currentUser.username)
         setDesc(currentUser.description || '')
         setPass(currentUser.password || '')
     }, [])
@@ -32,17 +28,13 @@ export default function EditProfilePage() {
         e.preventDefault()
         if (!currentUser?.id) return
 
-
         const data = {
-            username: name !== currentName ? name : null,
             description: desc !== currentDesc ? desc : null,
             password: pass !== currentPassword ? pass : null,
             id: currentUser.id
         }
 
-
         const isExecuted = await editUser(data)
-
 
         if (isExecuted.success) {
             alert('Ваш профиль был успешно изменен!')
@@ -73,8 +65,6 @@ export default function EditProfilePage() {
 
 
                     <section className="grid w-full grid-cols-1 items-center gap-4 sm:grid-cols-2">
-                        <label htmlFor="name" className={ui.text}>Имя Пользователя</label>
-                        <input type="text" id="name" className={ui.input} value={name} onChange={(e) => setName(e.target.value)} />
                         <label htmlFor="desc" className={ui.text}>Описание</label>
                         <textarea id="desc" className={`${ui.input} h-32 resize-none`} value={desc} onChange={(e) => setDesc(e.target.value)} />
                         <label htmlFor="pass" className={ui.text}>Пароль</label>

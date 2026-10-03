@@ -60,7 +60,7 @@
         $id = $request->get_param('id');
 
         $thread = get_post($id);
-        if (!isset($thread)) {
+        if (!$thread) {
             return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500]);
         }
 
@@ -158,7 +158,7 @@
             'description' => $new_desc,
             'parent' => get_post_meta($thread->ID, 'board_mark', true),
             'author' => get_post_meta($thread->ID, 'thread_author', true),
-            'createdAt' => get_the_date('Y-m-n H:i:s', $thread->ID),
+            'createdAt' => get_the_date('Y-m-d H:i:s', $thread->ID),
             'status' => $new_status,
             'password' => $new_pass
         ];
@@ -201,14 +201,14 @@
         $id = $params['id'];
 
         $thread = get_post($id);
-        if (empty($thread)) {
+        if (!$thread && (!($thread instanceof WP_Post))) {
             return new WP_Error('thread_not_found', 'Тред не был найден', ["status" => 404]);
         }
 
         $thread_pass = get_post_meta($thread->ID, 'thread_password', true);
 
         if ($password !== $thread_pass) {
-            return new WP_Error('invalid_password', 'Пароль неверный.', ["status" => 403]);
+            return new WP_Error('invalid_password', 'Пароль неверный.', ["status" => 403, "password" => $thread_pass ?? 'seledka']);
         }
 
         return new WP_REST_Response([
