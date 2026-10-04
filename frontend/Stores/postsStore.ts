@@ -25,11 +25,7 @@ const storePosts = create<Store_Posts>((set, get) => ({
             formData.append('content', data.content)
             formData.append('parent', String(data.parent))
             formData.append('author', data.author)
-            if (data.image instanceof Blob) {
-                formData.append('image_file', data.image)
-            } else if (typeof data.image === 'string') {
-                formData.append('image_url', data.image)
-            }
+            formData.append('image', (data.image instanceof Blob ? data.image : ''))
 
             const res = await axios.post(`${CUSTOM_API}/posts/create`, formData, {
                 headers: {
@@ -38,6 +34,7 @@ const storePosts = create<Store_Posts>((set, get) => ({
             })
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
+                console.log(res.data.post)
             return {
                 status: res.status,
                 success: res.data.success,
@@ -66,7 +63,6 @@ const storePosts = create<Store_Posts>((set, get) => ({
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
             return {
-                msg: '',
                 status: res.status,
                 id: res.data.post_id,
                 success: true

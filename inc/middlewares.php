@@ -150,12 +150,13 @@ function mw_is_post_author(WP_REST_Request $request)
         );
     }
 
-    $author_id = absint(get_post_field('post_author', $post_id));
+    $post_author = get_post_meta($post_id, 'post_author', true);
+    $current_username = get_userdata(get_current_user_id())->user_nicename;
 
-    if ($author_id === get_current_user_id()) {
+    if ($current_username === $post_author) {
         return true;
     }
-
+    
     return new WP_Error(
         'rest_forbidden',
         'Вы не являетесь автором данного поста.',

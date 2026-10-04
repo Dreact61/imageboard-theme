@@ -116,16 +116,13 @@ export type PostRequest = {
     content: string,
     author: string | "Аноним",
     parent: number,
-    FormData: {
-        image_file?: Blob | null,
-        image_url?: string | null
-    } | null
+    image: Blob | string | null
 }
 
 export type Store_Posts = {
     error: string | null,
     loading: boolean,
-    createPost: (data: Post) => Promise<Log>,
+    createPost: (data: PostRequest) => Promise<Log>,
     deletePost: (id: number) => Promise<Log>
 }
 

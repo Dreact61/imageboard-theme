@@ -119,7 +119,6 @@
         ]);
 
         register_post_meta('thread_post', 'post_image', [
-            'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_text_field',
