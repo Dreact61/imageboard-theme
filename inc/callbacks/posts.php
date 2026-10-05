@@ -78,6 +78,16 @@ function delete_current_post_api(WP_REST_Request $request)
     ], 200);
 }
 
+// function load_post_thumbnail(WP_REST_Request $request) {
+//     $id = $request->get_param('id');
+
+//     $relative_thumbnail = get_the_post_thumbnail($id, 'full');
+//     return new WP_REST_Response([
+//         'success' => true,
+//         'image' => $relative_thumbnail
+//     ]);
+// }
+
 function nuke_all_parentless_posts() {
     $all = get_posts([
         'numberposts' => -1,

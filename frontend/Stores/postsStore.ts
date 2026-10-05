@@ -34,7 +34,7 @@ const storePosts = create<Store_Posts>((set, get) => ({
             })
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
             
-                console.log(res.data.post)
+            console.log(res.data.post)
             return {
                 status: res.status,
                 success: res.data.success,

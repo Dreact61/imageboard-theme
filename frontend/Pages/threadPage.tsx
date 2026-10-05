@@ -128,7 +128,7 @@ export default function ThreadPage() {
         return
     }
 
-    const handleFileChange = (e:any) => {
+    const handleFileChange = (e: any) => {
         const selected = e.target.files?.[0]
         if (!selected) return
         setFile(selected)
@@ -177,17 +177,19 @@ export default function ThreadPage() {
                         <section className={ui.posts}>
                             {currentThreadPosts && currentThreadPosts.length !== 0
                                 ? currentThreadPosts.map(post => (
-                                    <div className={ui.post} key={post.id}>
+                                    <div className={`${ui.post} p-4`} key={post.id}>
                                         <h2 className={ui.author}>{post.author || 'Аноним'} - ({post.createdAt})</h2>
 
-                                        <div className={ui.postBody}>
-                                            <img className={ui.avatar} src={(post.image as string)} alt="Image" />
-                                            <b className={ui.postText}>{post.content}</b>
+                                        <div className="flex flex-row w-full justify-between items-center">
+                                            <div className={`${ui.postBody} items-center align-middle`}>
+                                                {post.image && <img className={ui.avatar} src={(post.image as string) || '#'} alt="Image" />}
+                                                <b className={`${ui.postText} align-middle`}>{post.content}</b>
+                                            </div>
+                                            {post.author === currentUser?.username || currentThread.author === currentUser?.username
+                                                ? <button className={ui.deleteButton} onClick={() => handlePostDeletion(post.id)} type="button">🗑</button>
+                                                : ''
+                                            }
                                         </div>
-                                        {post.author === currentUser?.username || currentThread.author === currentUser?.username
-                                            ? <button className={ui.deleteButton} onClick={() => handlePostDeletion(post.id)} type="button">Удалить</button>
-                                            : ''
-                                        }
                                     </div>
                                 ))
                                 : <p className={ui.empty}>У этого треда пока нет постов.</p>

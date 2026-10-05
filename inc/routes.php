@@ -343,7 +343,7 @@
                     'required' => false,
                     'sanitize_callback' => 'sanitize_text_field',
                     'validate_callback' => function($param) {
-                        return is_string($param) && mb_strlen($param) >= 6;
+                        return is_null($param) || (is_string($param) && mb_strlen($param) >= 6);
                     }
                 ]
             ],
@@ -533,4 +533,6 @@
             ]
         ]);
     });
+
+
 ?>

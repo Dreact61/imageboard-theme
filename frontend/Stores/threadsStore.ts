@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios, { AxiosRequestConfig } from "axios";
-import type { Thread, Store_Threads, Post } from '../../types'
+import type { Thread, Store_Threads, Post, ThreadRequest } from '../../types'
 
 const CUSTOM_API = process.env.CUSTOM_API
 
@@ -66,13 +66,13 @@ const storeThreads = create<Store_Threads>((set, get) => ({
         try {
             set({ error: null, loading: true, log: null })
 
-            const newThread: Thread = {
+            const newThread: ThreadRequest = {
                 name: data.name,
                 parent: data.parent,
                 description: data.description,
                 status: data.status || 'PUBLIC',
                 author: data.author,
-                password: data.password
+                password: data.password || null
             }
 
             const res = await axios.post(`${CUSTOM_API}/threads/create`, newThread, getAxiosConfig())
@@ -271,7 +271,7 @@ const storeThreads = create<Store_Threads>((set, get) => ({
         }
     },
 
-    dynamicPostAddition: async (post) => set((state) => ({ currentThreadPosts: [...state.currentThreadPosts, post] })),
+    dynamicPostAddition: async (post) => set((state) => ({ currentThreadPosts: [post, ...state.currentThreadPosts] })),
     dynamicPostDeletion: async (id) => set((state) => ({ currentThreadPosts: state.currentThreadPosts.filter(post => post.id !== id) }))
 }))
 

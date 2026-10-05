@@ -20,7 +20,7 @@ add_action('wp_enqueue_scripts', function () {
             'nonce' => wp_create_nonce('wp_rest')
         ]
     );
-    
+
     $css_path = 'build/output.css';
     if (file_exists(get_theme_file_path($css_path))) {
         wp_enqueue_style(
@@ -31,7 +31,6 @@ add_action('wp_enqueue_scripts', function () {
             filemtime(get_theme_file_path($css_path))
         );
     }
-
 });
 
 require_once __DIR__ . "/inc/roles.php";
@@ -52,6 +51,9 @@ add_filter('allowed_redirect_hosts', function ($hosts) {
     return $hosts;
 });
 
+add_action('after_setup_theme', function () {
+    add_theme_support('post_thumbnails');
+});
 
 //-----
 
@@ -70,3 +72,30 @@ add_filter('allowed_redirect_hosts', function ($hosts) {
 //     }
 // }
 // add_action('init', 'single_time_delete_all_cpt_boards');
+
+
+// function single_time_delete_all_threads()
+// {
+//     $threads_total = get_posts([
+//         'posts_per_page' => -1,
+//         'post_type' => 'thread',
+//         'post_status' => 'publish'
+//     ]);
+
+//     foreach ($threads_total as $thread) {
+//         $relative_posts = get_posts([
+//             'post_type' => 'thread_post',
+//             'numberposts' => -1,
+//             'post_status' => 'any',
+//             'meta_key' => 'thread_id',
+//             'meta_value' => $thread->ID
+//         ]);
+//         foreach ($relative_posts as $post) {
+//             wp_delete_post($post->ID, true);
+//         }
+
+//         wp_delete_post($thread->ID, true);
+//     }
+// }
+
+// add_action('init', 'single_time_delete_all_threads');

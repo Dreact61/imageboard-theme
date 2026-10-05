@@ -143,30 +143,28 @@ http://localhost:(YOUR_PORT_NAME)/wp-json/myapi/v1
 
 - `POST /register` — регистрация нового пользователя.
 - `POST /login` — вход (получение JWT).
-- `GET /users/{user_id}` — получение данных пользователя.
-  - `PUT /users/{user_id}/edit` — редактирование профиля.
-  - `DELETE /users/{user_id}/delete` — удаление пользователя.
+- `GET /users` — получение данных пользователя.
+- `PUT /users/edit` — редактирование профиля.
+- `POST /users/delete` — удаление пользователя.
 
 #### 2. Доски (Boards)
 
-- `GET /boards/{board_mark}` — получение информации о доске и списка тредов.
-  - `PUT /boards/{board_mark}/edit` — редактирование доски.
-  - `DELETE /boards/{board_mark}/delete` — удаление доски.
+- `GET /boards` — получение информации о доске и списка тредов.
+- `PUT /boards/edit` — редактирование доски.
+- `POST /boards/delete` — удаление доски.
 - `POST /boards/create` — создание новой доски.
 
 #### 3. Треды (Threads)
 
-- `GET /threads/{thread_id}` — получение треда и постов.
-  - `PUT /threads/{thread_id}/edit` — редактирование треда.
-  - `DELETE /threads/{thread_id}/delete` — удаление треда.
+- `GET /threads` — получение треда и постов.
+- `PUT /threads/edit` — редактирование треда.
+- `POST /threads/delete` — удаление треда.
 - `POST /threads/create` — создание нового треда.
 
 #### 4. Посты (Posts)
 
 - `POST /posts/create` — создание нового поста.
-- `DELETE /posts/{post_id}/delete` — удаление поста.
-
-> Методы (GET/POST/PUT/DELETE) уточни по факту реализации, если где-то отличаются.
+- `POST /posts/delete` — удаление поста.
 
 ### Группировки ошибок (`WP_Error`)
 

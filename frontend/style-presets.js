@@ -222,7 +222,7 @@ export const ui = {
     `,
 
     avatar: `
-        h-14 w-14
+        h-25 w-25
         shrink-0
         rounded-md
         border-2 border-[#261F3D]

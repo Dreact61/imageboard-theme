@@ -76,7 +76,9 @@ export type Thread = {
 
 export type ThreadRequest = {
     name: string,
-    description: string,
+    parent?: string | null,
+    description?: string | null,
+    author?: string | null,
     id?:number,
     password?: string | null,
     status: string
