@@ -9,7 +9,7 @@
             'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_text_field',
             'auth_callback' => function() {
-                return current_user_can('edit_posts');
+                return true;
             },
         ]);
 
@@ -19,7 +19,7 @@
             'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_textarea_field',
             'auth_callback' => function() {
-                return current_user_can('edit_posts');
+                return true;
             },
         ]);
 
@@ -29,7 +29,7 @@
             'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_text_field',
             'auth_callback' => function() {
-                return current_user_can('edit_posts');
+                return true;
             }
         ]);
 
@@ -119,7 +119,6 @@
         ]);
 
         register_post_meta('thread_post', 'post_image', [
-            'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_text_field',

@@ -115,7 +115,7 @@ export default function BoardPage() {
                                                 ? `/boards/${board_mark}/threads/${thread.id}`
                                                 : (currentUser?.username === thread.author 
                                                     ? `/boards/${board_mark}/threads/${thread.id}`
-                                                    : `/boards/${board_mark}/threads/${thread.id}/password`)}>{thread.name}</Link>
+                                                    : `/boards/${board_mark}/threads/${thread.id}/password`)}>{thread.name} ({thread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</Link>
                                         </strong>
                                         <i className={ui.description}>{thread.description ? thread.description : 'Нет описания.'}</i>
                                         <small className={ui.metadata}>Автор: {thread.author || 'Аноним'}</small>
@@ -127,7 +127,7 @@ export default function BoardPage() {
                         </section>
 
 
-                        <section className={ui.bottomActions}>
+                        <section className={`${ui.bottomActions} gap-4`}>
                             <button type="button" onClick={() => navigate(`/boards/${board_mark}/threads/create`)} className={ui.button}>Создать тред</button>
                             <button type="button" onClick={() => navigate('/')} className={ui.button}>Назад</button>
                         </section>
@@ -140,7 +140,7 @@ export default function BoardPage() {
                         ?
                         <section className={ui.headerActions}>
                             <button type="button" onClick={() => navigate(`/boards/${board_mark}/edit`)} className={ui.button}>Редактировать Доску</button>
-                            <button type="button" onClick={handleBoardDeletion} className={ui.button}>Удалить Доску</button>
+                            <button type="button" onClick={handleBoardDeletion} className={ui.deleteButton}>Удалить Доску</button>
                         </section>
                         : ''
                     }

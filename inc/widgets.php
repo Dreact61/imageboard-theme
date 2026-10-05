@@ -1,5 +1,5 @@
 <?php
-add_action('wp_dashboard_setup', function() {
+add_action('wp_dashboard_setup', function () {
     wp_add_dashboard_widget(
         'main_element',
         'Основная сводка данных D-CHAN',
@@ -7,15 +7,20 @@ add_action('wp_dashboard_setup', function() {
     );
 });
 
-function render_main_element() {
+function render_main_element()
+{
     $users = count_users();
     $total_users = $users['total_users'];
 
     $role_user = $users['avail_roles']['user'] ?? 0;
 
-    $boards_count = wp_count_posts('board')->publish ?? 0;
+    $boards_count = get_posts([
+        'numberposts' => -1,
+        'post_type' => 'board',
+        'post_status' => 'publish'
+    ]);
 
-    ?>
+?>
     <style>
 
     </style>
@@ -30,7 +35,7 @@ function render_main_element() {
 
             <div class="card">
                 <h4>Активных досок</h4>
-                <div class="wp-number"><?php echo esc_html($boards_count); ?></div>
+                <div class="wp-number"><?php echo esc_html(count($boards_count)); ?></div>
             </div>
 
             <div class="wp-footer">
@@ -41,14 +46,14 @@ function render_main_element() {
             </div>
         </section>
     </div>
-    <?php
+<?php
 }
 
 //==================================
 // BOARDS
 //==================================
 
-add_action('wp_dashboard_setup', function() {
+add_action('wp_dashboard_setup', function () {
     wp_add_dashboard_widget(
         'boards_widget',
         'Доски (Boards)',
@@ -56,9 +61,14 @@ add_action('wp_dashboard_setup', function() {
     );
 });
 
-function render_boards_info() {
-    $boards_total = wp_count_posts('boards')->publish ?? 0;
-    
+function render_boards_info()
+{
+    $boards_total = get_posts([
+        'numberposts' => -1,
+        'post_status' => 'publish',
+        'post_type' => 'board'
+    ]);
+
     $special_boards = get_posts([
         'posts_per_page' => 3,
         'post_status' => 'publish',
@@ -72,7 +82,7 @@ function render_boards_info() {
         'post_status' => 'publish',
         'post_type' => 'board'
     ]);
-    ?>
+?>
     <style></style>
 
     <div class="main">
@@ -80,18 +90,18 @@ function render_boards_info() {
         <section class="wp-stats-container">
             <div class="card">
                 <h4>Всего активных досок</h4>
-                <div class="wp-number"><?php echo esc_html($boards_total); ?></div>
+                <div class="wp-number"><?php echo esc_html(count($boards_total)); ?></div>
             </div>
             <div class="card">
                 <h4>Доски, созданные автором</h4>
-                <div class="wp-number"><?php 
-                if (!$special_boards) {
-                    echo "Таких досок пока не было.";
-                }
-                foreach ($special_boards as $board) {
-                    echo esc_html($board->post_title);
-                }
-                ?></div>
+                <div class="wp-number"><?php
+                                        if (!$special_boards) {
+                                            echo "Таких досок пока не было.";
+                                        }
+                                        foreach ($special_boards as $board) {
+                                            echo esc_html($board->post_title);
+                                        }
+                                        ?></div>
             </div>
             <div class="card">
                 <h4>Последние созданные доски:</h4>
@@ -107,14 +117,14 @@ function render_boards_info() {
             </div>
         </section>
     </div>
-    <?php
+<?php
 }
 
 //==================================
 // THREADS
 //==================================
 
-add_action('wp_dashboard_setup', function() {
+add_action('wp_dashboard_setup', function () {
     wp_add_dashboard_widget(
         'threads_widget',
         'Треды (Threads)',
@@ -122,20 +132,33 @@ add_action('wp_dashboard_setup', function() {
     );
 });
 
-function render_threads_info() {
+function render_threads_info()
+{
     $threads_total = get_posts([
-        'posts_per_page' => 1,
+        'posts_per_page' => -1,
         'post_type' => 'thread',
         'post_status' => 'publish'
     ]);
 
-    $last_id = wp_count_posts('thread')->publish ?? 0;
-    $last_thread = get_post($last_id, 'thread');
+    $last_id = count($threads_total);
+    $last_thread = get_post($threads_total[array_key_last($threads_total)]);
 
-    $relative_board_id = get_post_meta($last_thread->ID, 'board_id', true);
-    $board_name = get_post($relative_board_id, 'board')->post_title;
+    $rel_board_mark = get_post_meta($last_id, 'board_mark', true);
+    $rel_board = get_posts([
+        'numberposts' => 1,
+        'post_status' => 'publish',
+        'post_type' => 'board',
+        'meta_key' => 'board_mark',
+        'meta_value' => $rel_board_mark
+    ]);
+    $board = $rel_board[0];
 
-    ?>
+    $thread_iteration = [];
+    foreach ($threads_total as $thread) {
+        $thread_iteration[] = $thread;
+    }
+
+?>
     <style></style>
 
     <div class="main">
@@ -143,30 +166,40 @@ function render_threads_info() {
         <section class="wp-stats-container">
             <div class="card">
                 <h4>Общее кол-во тредов</h4>
-                <div class="wp-number"><?php echo esc_html(count($threads_total)); ?></div>
+                <div class="wp-number"><?php echo esc_html($last_id); ?></div>
             </div>
             <div class="card">
                 <h4>Последний созданный тред</h4>
                 <div class="wp-number"><?php
-                    if (!$threads_total) {
-                        echo "Пока созданных тредов не было.";
-                        
-                    } else {
-                        echo "Имя доски -> $board_name";
-                        echo "Тред -> $last_thread->post_title";
-                    }
-                ?></div>
+                                        if (!$threads_total) {
+                                            echo "Пока созданных тредов не было.";
+                                        } else {
+                                            echo "Имя доски -> $board->post_title\n";
+                                            echo "Тред -> $last_thread->post_title";
+                                        }
+                                        ?></div>
+            </div>
+
+            <div class="card">
+                <h4>Все Треды</h4>
+                <div class="wp-number"><?php
+                                        if (!$threads_total) {
+                                            echo "Пока созданных тредов не было.";
+                                        } else {
+                                            print_r($thread_iteration);
+                                        }
+                                        ?></div>
             </div>
         </section>
     </div>
-    <?php
+<?php
 }
 
 //==================================
 // POSTS
 //==================================
 
-add_action('wp_dashboard_setup', function() {
+add_action('wp_dashboard_setup', function () {
     wp_add_dashboard_widget(
         'posts_widget',
         'Посты тредов (Posts)',
@@ -174,15 +207,20 @@ add_action('wp_dashboard_setup', function() {
     );
 });
 
-function render_posts_info() {
-    $posts_total = wp_count_posts('thread_posts')->publish ?? 0;
+function render_posts_info()
+{
+    $posts_total = get_posts([
+        'numberposts' => -1,
+        'post_type' => 'thread_post',
+        'post_status' => 'publish'
+    ]);
 
-    $last_written_post = get_post($posts_total, 'thread_post');
+    $last_written_post = get_post($posts_total[0], 'thread_post');
     $relative_thread = get_post($last_written_post->ID, 'thread');
     $relative_board = get_post($relative_thread->ID, 'board');
 
     $trimmed_post = wp_trim_words($last_written_post->post_content, 10, '...');
-    ?>
+?>
     <style></style>
 
     <div class="main">
@@ -190,30 +228,30 @@ function render_posts_info() {
         <section class="wp-stats-container">
             <div class="card">
                 <h4>Общее кол-во постов</h4>
-                <div class="wp-number"><?php echo esc_html($posts_total); ?></div>
+                <div class="wp-number"><?php echo esc_html(count($posts_total)); ?></div>
             </div>
             <div class="card">
                 <h4>Последний оставленный пост</h4>
                 <div class="wp-number"><?php
-                    if($posts_total === 0) {
-                        echo "Постов пока нет.";
-                    } else {
-                        echo "Имя доски -> $relative_board->post_title";
-                        echo "Имя треда -> $relative_thread->post_title";
-                        echo "Содержание поста -> $trimmed_post";
-                    }
-                ?></div>
+                                        if ($posts_total === 0) {
+                                            echo "Постов пока нет.";
+                                        } else {
+                                            echo "Имя доски -> $relative_board->post_title\n";
+                                            echo "Имя треда -> $relative_thread->post_title\n";
+                                            echo "Содержание поста -> $trimmed_post";
+                                        }
+                                        ?></div>
             </div>
         </section>
     </div>
-    <?php
+<?php
 }
 
 //==================================
 // USERS
 //==================================
 
-add_action('wp_dashboard_setup', function() {
+add_action('wp_dashboard_setup', function () {
     wp_add_dashboard_widget(
         'users_widget',
         'Пользователи',
@@ -221,13 +259,14 @@ add_action('wp_dashboard_setup', function() {
     );
 });
 
-function render_users_info() {
+function render_users_info()
+{
     $users = count_users();
     $total_users = $users['total_users'];
 
     $role_user = $users['avail_roles']['user'] ?? 0;
     $role_admin = $users['avail_roles']['admin'] ?? 0;
-    ?>
+?>
     <style></style>
 
     <div class="main">
@@ -240,6 +279,6 @@ function render_users_info() {
             </ul>
         </section>
     </div>
-    <?php
+<?php
 }
 ?>

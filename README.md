@@ -1,185 +1,245 @@
-# D-CHAN (имиджборд-проект с использованием технологии Headless CMS)
+# D-CHAN
 
-****
+Имиджборд-проект с использованием технологии Headless CMS.  
+Бэкенд — WordPress REST API + кастомные эндпоинты, фронтенд — React + TypeScript, аутентификация через JWT.
 
----
+## Особенности
 
-## эндпоинты:
+- Headless-архитектура: WordPress как API, React как фронтенд.
+- Кастомные REST-эндпоинты для пользователей, досок, тредов и постов.
+- JWT-аутентификация с токеном в `httpOnly` cookie.
+- Адаптивный UI на Tailwind CSS.
+- Сборка фронтенда через Webpack + Babel.
+- Развёртывание через Docker (WordPress + БД).
 
-> Основной адрес - **`http://localhost:8080/wp-json/myapi/v1`**
+## Скриншоты
+### Список досок
 
-1. Пользователи (Users)
- - `/register`
- - `/login`
- - `/users/(user_id)`
-   1. `/edit`
-   2. `/delete`
-2. Доски (Boards)
- - `/boards/(board_mark)`
-   1. `/edit`
-   2. `/delete`
- - `/boards/create`
-3. Треды (Threads)
- - `/threads/(thread_id)`
-   1. `/edit`
-   2. `/delete`
- - `threads/create`
-4. Посты (Posts)
- - `posts/create`
- - `posts/(post_id)/delete`
+![Список досок](./public/screenshots/boards.png)
 
----
+### Страница доски (список тредов)
 
-## группировки требований эндпоинтов и приходящие данные:
+![Страница доски](./public/screenshots/board.png)
 
-1. ### Доски:
-  - `register_boards_api` (Создание доски):
-        Принимает:
-        - name (required string),
-        - description (string),
-        - mark (required string),
-        - author (required string)
-        Отдает:
-        - success (true/false),
-        - Board (Все данные касательно созданной доски)
-        - Thread ([] - пустой массив принадлежащих доске тредов)
+### Страница треда
 
-  - `fetch_current_board_api` (Парсинг конкретной доски):
-        Принимает:
-        - id (required integer)
-        Отдает:
-        - success (true/false),
-        - Board (Все данные касательно этой доски),
-        - Thread (Массив принадлежащих доске тредов)
-  
-  - `edit_current_board_api` (Изменение конкретной доски):
-        Принимает:
-        - id (required integer),
-        - name (string),
-        - description (string),
-        - mark (string)
-        Отдает:
-        - success (true/false),
-        - Board (Все данные касательно измененной доски в новом виде)
-  
-  - `delete_current_board_api` (Удаление доски):
-        Принимает:
-        - id (required)
-        Отдает:
-        - success (true/false),
-        - id 
+![Страница треда](./public/screenshots/thread.png)
 
-2. ### Треды
- - `fetch_current_thread_api` (Парсинг треда):
-        Принимает:
-        - id (required integer),
-        Отдает:
-        - success (true/false),
-        - thread (Все данные о треде),
-        - posts (Все принадлежащие треду посты)
+### Создание треда / поста
 
-  - `imageboard_create_thread` (Создание треда):
-        Принимает:
-        - name (required string),
-        - description (string),
-        - parent (required integer),
-        - author (required string),
-        - status (required 'PRIVATE' or 'PUBLIC')
-        Отдает:
-        - success (true/false),
-        - thread (Все данные о треде),
-        - posts ([] - пустой массив постов)
-  
-  - `edit_current_thread_api` (Изменение треда):
-        Принимает:
-        - id (required integer),
-        - name (string),
-        - description(string),
-        - status (string)
-        Отдает:
-        - success (true/false),
-        - thread (Измененные данные треда)
+![Создание треда](./public/screenshots/create-thread.png)
 
-  - `delete_current_thread_api` (Удаление треда):
-        Принимает:
-        - id (required integer)
-        Отдает:
-        - success (true/false),
-        - id
+## Стек
 
-3. ### Посты
-  - `imageboard_create_post` (Создание поста):
-        Принимает:
-        - content (required string),
-        - author (required string),
-        - parent (required integer)
-        Отдает:
-        - success (true/false),
-        - post (Содержимое поста)
-  
-  - `delete_current_post_api` (Удаление поста):
-        Принимает:
-        - id (required integer)
-        Отдает:
-        - success (true/false),
-        - id
+**Frontend:**
 
-4. ### Пользователи
-  - `handle_user_register` (Регистрация):
-        Принимает:
-        - username (required string),
-        - password (required string),
-        - description (string)
-        Отдает:
-        - success (true/false),
-        - user (Данные созданного пользователя)
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Axios
+- Zustand (state management)
+- React Router
 
-  - `handle_user_login` (Вход в аккаунт):
-        Принимает:
-        - username (required string),
-        - password (required string)
-        Отдает:
-        - success (true/false),
-        - user (Данные залогиненного пользователя)
+**Backend:**
 
-  - `handle_user_edit` (Изменение данных пользователя):
-        Принимает:
-        - id (required integer),
-        - username (string),
-        - description (string),
-        - password (string)
-        Отдает:
-        - success (true/false),
-        - user (Измененные данные пользователя)
+- WordPress (PHP 8.0+)
+- WordPress REST API + кастомные маршруты
+- `$wpdb` для работы с БД
+- JWT (firebase/php-jwt)
 
-  - `handle_user_deletion` (Удаление пользователя):
-        Принимает:
-        - id (required integer)
-        Отдает:
-        - success (true/false),
-        - id
+**Инфраструктура:**
 
-> **Ошибки, в свою очередь, возвращают следующие элементы:**
-> **success (false)**
-> **status (передаваемый код ошибки)**
-> **details (на все CRUD операции, кроме удаления и чтения)**
+- Docker + Docker Compose
+- MySQL / MariaDB
+- Node.js 22, pnpm 11
 
----
+## Требования
 
-## группировки ошибок `WP_Error()`:
+- PHP >= 8.0
+- MySQL / MariaDB (версия зависит от образа WordPress)
+- Node.js >= 22
+- pnpm >= 11
+- Docker и Docker Compose
 
- - `server_error` ("Ошибка на стороне сервера") - код 500;
- - `missing_fields` ("Не все важные поля были заполнены") - код 400;
- - `author_not_defined` ("Пользователь не найден или не зарегистрирован") - код 401;
- - `username_taken` ("Такое имя уже занято") - код 400;
- - `board_not_found` ("Доска не найдена") - код 404;
- - `thread_not_found` ("Тред не найден") - код 404
- - `not_defined` ("Недостоверные данные") - код 400;
- - `relative_threads_are_not_parsed` ("Не получилось достать треды, связанные с меткой (метка доски)") - код 404;
- - `nothing_to_change` ("Ничего не изменилось") - код 204;
- - `user_not_found` ("Пользователь не найден") - код 404;
- - `invalid_credentials` ("Неверный логин или пароль") - код 400;
- - `rest_forbidden` ("Вы не авторизованы") - код 401;
- - `invalid_token` ("Токен сломан или просрочен") - код 401;
- - `not_admin` ("Недостаточно прав") - код 403;
- - `error_unknown` ("Неизвестная ошибка") - код 500;
+## Установка и запуск
+
+### 1. Клонирование
+
+```bash
+git clone <URL-репозитория>
+cd imageboard-theme
+```
+
+### 2. Настройка переменных окружения
+
+Скопируй пример и отредактируй под себя:
+
+```bash
+cp .env.example .env
+```
+
+В `.env` укажи нужные значения. Пример для `CUSTOM_API`:
+
+```env
+# Базовый URL кастомного API
+# Пример: http://localhost:8080/wp-json/myapi/v1
+CUSTOM_API=http://localhost:(YOUR_PORT_NAME)/wp-json/myapi/v1
+```
+
+Замени `(YOUR_PORT_NAME)` на порт, который ты используешь в `docker-compose` для WordPress.
+
+### 3. Запуск через Docker
+
+В корне проекта (где лежит `docker-compose.yml`):
+
+```bash
+docker compose up -d
+```
+
+Это поднимет:
+
+- WordPress с БД;
+- тему `imageboard-theme` внутри WordPress.
+
+### 4. Установка зависимостей фронтенда
+
+Зайди в папку темы:
+
+```bash
+cd wp-projects/wp-content/themes/imageboard-theme
+pnpm install
+```
+
+### 5. Сборка и запуск фронтенда
+
+Для разработки:
+
+```bash
+pnpm start
+pnpm tailwind
+```
+
+Для продакшена (сборка в `build/`):
+
+```bash
+pnpm build
+```
+
+После этого фронтенд будет доступен по адресу, указанному в конфиге WordPress.
+
+## API
+
+### Базовый URL
+
+```text
+http://localhost:(YOUR_PORT_NAME)/wp-json/myapi/v1
+```
+
+Замени `(YOUR_PORT_NAME)` на свой порт (например, `8080`).
+
+### Эндпоинты
+
+#### 1. Пользователи (Users)
+
+- `POST /register` — регистрация нового пользователя.
+- `POST /login` — вход (получение JWT).
+- `GET /users` — получение данных пользователя.
+- `PUT /users/edit` — редактирование профиля.
+- `POST /users/delete` — удаление пользователя.
+
+#### 2. Доски (Boards)
+
+- `GET /boards` — получение информации о доске и списка тредов.
+- `PUT /boards/edit` — редактирование доски.
+- `POST /boards/delete` — удаление доски.
+- `POST /boards/create` — создание новой доски.
+
+#### 3. Треды (Threads)
+
+- `GET /threads` — получение треда и постов.
+- `PUT /threads/edit` — редактирование треда.
+- `POST /threads/delete` — удаление треда.
+- `POST /threads/create` — создание нового треда.
+
+#### 4. Посты (Posts)
+
+- `POST /posts/create` — создание нового поста.
+- `POST /posts/delete` — удаление поста.
+
+### Группировки ошибок (`WP_Error`)
+
+- `server_error` — «Ошибка на стороне сервера» — код **500**.
+- `missing_fields` — «Не все важные поля были заполнены» — код **400**.
+- `author_not_defined` — «Пользователь не найден или не зарегистрирован» — код **401**.
+- `username_taken` — «Такое имя уже занято» — код **400**.
+- `board_not_found` — «Доска не найдена» — код **404**.
+- `thread_not_found` — «Тред не найден» — код **404**.
+- `not_defined` — «Недостоверные данные» — код **400**.
+- `relative_threads_are_not_parsed` — «Не получилось достать треды, связанные с меткой (метка доски)» — код **404**.
+- `nothing_to_change` — «Ничего не изменилось» — код **204**.
+- `user_not_found` — «Пользователь не найден» — код **404**.
+- `invalid_credentials` — «Неверный логин или пароль» — код **400**.
+- `rest_forbidden` — «Вы не авторизованы» — код **401**.
+- `invalid_token` — «Токен сломан или просрочен» — код **401**.
+- `not_admin` — «Недостаточно прав» — код **403**.
+- `error_unknown` — «Неизвестная ошибка» — код **500**.
+
+## Структура проекта
+
+```text
+.
+├── build/                 # Собранный фронтенд (игнорируется в git)
+├── frontend/              # React-код фронтенда
+│   ├── Pages/             # Страницы приложения
+│   ├── Parts/             # Переиспользуемые компоненты
+│   ├── Stores/            # Zustand-сторы
+│   ├── style-presets.js   # Пресеты стилей
+│   └── tailwind.css       # Основной Tailwind-файл
+├── inc/                   # PHP-код темы
+│   ├── callbacks/         # Callbacks для REST API
+│   ├── jwt-helper.php     # Утилиты для работы с JWT
+│   ├── meta.php           # Работа с мета-полями
+│   ├── middlewares.php    # Middleware для REST API
+│   ├── roles.php          # Роли и возможности
+│   ├── routes.php         # Регистрация REST-маршрутов
+│   └── widgets.php        # Виджеты (если используются)
+├── public/
+│   ├── pictures/          # Загруженные изображения
+│   └── screenshots/       # Скриншоты для README
+├── vendor/                # Composer-зависимости (игнорируется в git)
+├── node_modules/          # Node-зависимости (игнорируется в git)
+├── .github/
+│   └── workflows/         # CI/CD (pnpm audit и т.д.)
+├── .env                   # Переменные окружения
+├── .env.example           # Пример переменных
+├── composer.json          # PHP-зависимости
+├── package.json           # Node-зависимости
+├── functions.php          # Точка входа темы
+├── index.php              # Главный файл темы
+├── root.jsx               # Корневой React-компонент
+├── webpack.config.cjs     # Конфиг Webpack
+└── tsconfig.json          # Конфиг TypeScript
+```
+
+## CI / безопасность
+
+В проекте настроен CI-пайплайн (`.github/workflows`), который включает:
+
+- `pnpm audit` - проверка уязвимостей в Node-зависимостях.
+
+Рекомендуется периодически запускать:
+
+```bash
+pnpm audit
+composer audit
+```
+
+## Лицензия
+
+Проект распространяется как open source без явной лицензии.  
+Используй на свой страх и риск.
+
+## Контакты
+
+- Telegram: [@quintessencs](https://t.me/quintessencs)
+- Email: [dreact61@gmail.com](mailto:dreact61@gmail.com)

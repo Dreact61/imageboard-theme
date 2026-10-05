@@ -5,7 +5,7 @@ export default function Footer() {
     return (
         <footer className={`${ui.card} mt-4 w-full max-w-5xl`}>
             <section className="flex w-full items-center justify-center pb-2">
-                <p className={ui.accent}>FOOTER EXAMPLE</p>
+                <p className={ui.accent}>D-CHAN PROJECT</p>
             </section>
 
             <section className="flex flex-col items-center justify-center">

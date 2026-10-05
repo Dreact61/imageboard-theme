@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import axios, {AxiosRequestConfig} from "axios";
-import type {Thread, Store_Threads, Post} from '../../types'
+import axios, { AxiosRequestConfig } from "axios";
+import type { Thread, Store_Threads, Post, ThreadRequest } from '../../types'
 
 const CUSTOM_API = process.env.CUSTOM_API
 
@@ -22,12 +22,12 @@ const storeThreads = create<Store_Threads>((set, get) => ({
 
     fetchThisThread: async (id) => {
         try {
-            set({error: null, loading: true, log: null})
+            set({ error: null, loading: true, log: null })
 
-            const res = await axios.post(`${CUSTOM_API}/threads`, {id})
+            const res = await axios.post(`${CUSTOM_API}/threads`, { id })
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-            
-            const thread:Thread = res.data.thread
+
+            const thread: Thread = res.data.thread
             const posts = res.data.posts
 
             let result_log = {
@@ -43,44 +43,44 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 log: result_log
             })
             return result_log
-        } catch(err:any) {
+        } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
             const Log = {
-                    success: false,
-                    msg: errorMsg,
-                    status: err.response?.status || 500,
-                    data: {}
-                }
-                set({
-                    error: errorMsg,
-                    log: Log
-                })
-                return Log
+                success: false,
+                msg: errorMsg,
+                status: err.response?.status || 500,
+                data: {}
+            }
+            set({
+                error: errorMsg,
+                log: Log
+            })
+            return Log
         } finally {
-            set({loading:false})
+            set({ loading: false })
         }
     },
 
     createNewThread: async (data) => {
         try {
-            set({error: null, loading: true, log: null})
+            set({ error: null, loading: true, log: null })
 
-            const newThread:Thread = {
+            const newThread: ThreadRequest = {
                 name: data.name,
                 parent: data.parent,
                 description: data.description,
                 status: data.status || 'PUBLIC',
                 author: data.author,
-                password: data.status
+                password: data.password || null
             }
 
             const res = await axios.post(`${CUSTOM_API}/threads/create`, newThread, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-            
-            const thread:Thread = res.data.thread_data
 
-            const createdThread:Thread = {
+            const thread: Thread = res.data.thread_data
+
+            const createdThread: Thread = {
                 id: thread.id,
                 name: thread.name,
                 description: thread.description,
@@ -103,28 +103,28 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 log: result_log
             })
             return result_log
-        } catch(err:any) {
+        } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
             const Log = {
-                    success: false,
-                    msg: errorMsg,
-                    status: err.response?.status || 500,
-                    data: {}
-                }
+                success: false,
+                msg: errorMsg,
+                status: err.response?.status || 500,
+                data: {}
+            }
             set({
                 error: errorMsg,
                 log: Log
             })
             return Log
         } finally {
-            set({loading:false})
+            set({ loading: false })
         }
     },
 
     editThread: async (id, data) => {
         try {
-            set({error: null, loading: true, log: null})
+            set({ error: null, loading: true, log: null })
             const dataToEdit = {
                 id: id,
                 name: data.name,
@@ -135,8 +135,8 @@ const storeThreads = create<Store_Threads>((set, get) => ({
 
             const res = await axios.put(`${CUSTOM_API}/threads/edit`, dataToEdit, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
-            
-            const thread:Thread = res.data.thread
+
+            const thread: Thread = res.data.thread
 
             const editedThread = {
                 id: thread.id,
@@ -156,64 +156,64 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 data: editedThread
             }
 
-            const {currentThread} = get()
-            if(currentThread && currentThread.id === editedThread.id) set({currentThread: editedThread})
-            set({log: result_log})
+            const { currentThread } = get()
+            if (currentThread && currentThread.id === editedThread.id) set({ currentThread: editedThread })
+            set({ log: result_log })
             return result_log
-        } catch(err:any) {
+        } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
             const Log = {
-                    success: false,
-                    msg: errorMsg,
-                    status: err.response?.status || 500,
-                    data: {}
-                }
+                success: false,
+                msg: errorMsg,
+                status: err.response?.status || 500,
+                data: {}
+            }
             set({
                 error: errorMsg,
                 log: Log
             })
             return Log
         } finally {
-            set({loading:false})
+            set({ loading: false })
         }
     },
 
     deleteThread: async (id) => {
         try {
-            set({error: null, loading: true, log: null})
-            const res = await axios.post(`${CUSTOM_API}/threads/delete`, {id}, getAxiosConfig())
+            set({ error: null, loading: true, log: null })
+            const res = await axios.post(`${CUSTOM_API}/threads/delete`, { id }, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
 
-            set({currentThread: null, currentThreadPosts: []})
+            set({ currentThread: null, currentThreadPosts: [] })
             return {
                 success: res.data.success,
                 msg: 'Тред успешно удален',
                 status: res.status,
                 data: id
             }
-        } catch(err:any) {
+        } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
             const Log = {
-                    success: false,
-                    msg: errorMsg,
-                    status: err.response?.status || 500,
-                }
+                success: false,
+                msg: errorMsg,
+                status: err.response?.status || 500,
+            }
             set({
                 error: errorMsg,
                 log: Log
             })
             return Log
         } finally {
-            set({loading:false})
+            set({ loading: false })
         }
     },
 
     handlePrivateThreadLogin: async (id, password) => {
         try {
-            set({error: null, loading: true, log: null})
-            const res = await axios.post(`${CUSTOM_API}/threads/private-pass`, {id, password}, getAxiosConfig())
+            set({ error: null, loading: true, log: null })
+            const res = await axios.post(`${CUSTOM_API}/threads/private-pass`, { id, password })
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
 
             return {
@@ -222,28 +222,29 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 status: res.status,
                 data: id
             }
-        } catch(err:any) {
+        } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
             const Log = {
-                    success: false,
-                    msg: errorMsg,
-                    status: err.response?.status || 500,
-                }
+                success: false,
+                msg: errorMsg,
+                status: err.response?.status || 500,
+                data: err.response.data.data.password
+            }
             set({
                 error: errorMsg,
                 log: Log
             })
             return Log
         } finally {
-            set({loading:false})
+            set({ loading: false })
         }
     },
 
     handleThreadPasswordOutput: async (id) => {
         try {
-            set({error: null, loading: true, log: null})
-            const res = await axios.post(`${CUSTOM_API}/threads/password`, {id}, getAxiosConfig())
+            set({ error: null, loading: true, log: null })
+            const res = await axios.post(`${CUSTOM_API}/threads/password`, { id }, getAxiosConfig())
             if (!res.data?.success) throw new Error(res.data?.details || res.data?.message || 'error_unknown')
 
             return {
@@ -252,26 +253,26 @@ const storeThreads = create<Store_Threads>((set, get) => ({
                 status: res.status,
                 data: res.data.password
             }
-        } catch(err:any) {
+        } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || "Неизвестная ошибка"
             console.error(errorMsg)
             const Log = {
-                    success: false,
-                    msg: errorMsg,
-                    status: err.response?.status || 500,
-                }
+                success: false,
+                msg: errorMsg,
+                status: err.response?.status || 500,
+            }
             set({
                 error: errorMsg,
                 log: Log
             })
             return Log
         } finally {
-            set({loading:false})
+            set({ loading: false })
         }
     },
 
-    dynamicPostAddition: async (post) => set((state) => ({currentThreadPosts: [...state.currentThreadPosts, post]})),
-    dynamicPostDeletion: async (id) => set((state) => ({currentThreadPosts: state.currentThreadPosts.filter(post => post.id !== id)}))
+    dynamicPostAddition: async (post) => set((state) => ({ currentThreadPosts: [post, ...state.currentThreadPosts] })),
+    dynamicPostDeletion: async (id) => set((state) => ({ currentThreadPosts: state.currentThreadPosts.filter(post => post.id !== id) }))
 }))
 
 export default storeThreads

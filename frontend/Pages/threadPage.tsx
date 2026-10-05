@@ -2,14 +2,12 @@ import React, { useEffect, useState, useSyncExternalStore } from "react"
 import { useNavigate, useParams, Link } from "react-router"
 import storeThreads from "../Stores/threadsStore"
 
-
 import { ui } from "../style-presets"
 import Header from "../Parts/header"
 import Footer from "../Parts/footer"
 import storeUsers from "../Stores/userStore"
 import storePosts from "../Stores/postsStore"
 import { Post } from "../../types"
-
 
 export default function ThreadPage() {
     //NAVIGATION && PARAMS
@@ -26,9 +24,7 @@ export default function ThreadPage() {
     const dynamicPostAddition = storeThreads.getState().dynamicPostAddition
     const dynamicPostDeletion = storeThreads.getState().dynamicPostDeletion
 
-
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
-
 
     const createPost = storePosts.getState().createPost
     const deletePost = storePosts.getState().deletePost
@@ -36,56 +32,45 @@ export default function ThreadPage() {
     const [isFetching, setIsFetching] = useState(true)
     const [status, setStatus] = useState(0)
     const [msg, setMsg] = useState('')
-
-
-    const [postContent, setPostContent] = useState('')
     const [postContentErr, setPostContentErr] = useState('')
 
+    const [postContent, setPostContent] = useState('')
+    const [file, setFile] = useState(null)
 
     const [toDelete, setToDelete] = useState(false)
     const [postToDelete, setPostToDelete] = useState(false)
 
-
     useEffect(() => {
         if (!thread_id || !board_mark) return
-
 
         const handleAsyncParse = async () => {
             setIsFetching(true)
 
-
             const IDAsNum = Number(thread_id)
             const log = await fetchThisThread(IDAsNum)
-
 
             if (!log.success) {
                 setStatus(log.status)
                 setMsg(log?.msg || 'error_unknown')
             }
 
-
             setIsFetching(false)
         }
         handleAsyncParse()
-
-
-        console.log(currentThread)
     }, [thread_id, board_mark])
     //HANDLERS
     const handleMessageSending = async (e: React.SubmitEvent) => {
         e.preventDefault()
         if (!currentThread || !currentThread.id) return
 
-
         const data = {
             content: postContent,
             author: currentUser?.username || 'Аноним',
-            parent: currentThread.id
+            parent: currentThread.id,
+            image: file
         }
 
-
         const log = await createPost(data)
-
 
         if (!log.success) {
             setPostContentErr(log.msg || 'Непредвиденная ошибка.')
@@ -94,13 +79,11 @@ export default function ThreadPage() {
             dynamicPostAddition(log.data as Post)
         }
 
-
         return
     }
     useEffect(() => {
         fetchThisThread
     }, [currentThreadPosts])
-
 
     const handleThreadDeletion = async () => {
         if (toDelete) {
@@ -124,7 +107,6 @@ export default function ThreadPage() {
         return
     }
 
-
     const handlePostDeletion = async (id: any) => {
         if (postToDelete) {
             if (!id) return
@@ -144,6 +126,12 @@ export default function ThreadPage() {
             setPostToDelete(true)
         }
         return
+    }
+
+    const handleFileChange = (e: any) => {
+        const selected = e.target.files?.[0]
+        if (!selected) return
+        setFile(selected)
     }
     //RENDER
     let mainContent: any
@@ -169,7 +157,6 @@ export default function ThreadPage() {
                 <div className={ui.content}>
                     <Header />
 
-
                     {currentUser && (currentThread.author === currentUser?.username || currentUser.role === 'admin')
                         ?
                         <section className={ui.headerActions}>
@@ -179,7 +166,6 @@ export default function ThreadPage() {
                         : ''
                     }
 
-
                     <main className={ui.main}>
                         <section className={ui.threadInfo}>
                             <strong className={ui.threadTitle}>{currentThread.name} ({currentThread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</strong>
@@ -188,40 +174,41 @@ export default function ThreadPage() {
                             <small className={ui.metadata}>Время создания: {currentThread.createdAt}</small>
                         </section>
 
-
                         <section className={ui.posts}>
                             {currentThreadPosts && currentThreadPosts.length !== 0
                                 ? currentThreadPosts.map(post => (
-                                    <div className={ui.post} key={post.id}>
+                                    <div className={`${ui.post} p-4`} key={post.id}>
                                         <h2 className={ui.author}>{post.author || 'Аноним'} - ({post.createdAt})</h2>
 
-                                        <div className={ui.postBody}>
-                                            <img className={ui.avatar} src={(post.image as string) || '/pictures/ico.png'} alt="Image" />
-                                            <b className={ui.postText}>{post.content}</b>
+                                        <div className="flex flex-row w-full justify-between items-center">
+                                            <div className={`${ui.postBody} items-center align-middle`}>
+                                                {post.image && <img className={ui.avatar} src={(post.image as string) || '#'} alt="Image" />}
+                                                <b className={`${ui.postText} align-middle`}>{post.content}</b>
+                                            </div>
+                                            {post.author === currentUser?.username || currentThread.author === currentUser?.username
+                                                ? <button className={ui.deleteButton} onClick={() => handlePostDeletion(post.id)} type="button">🗑</button>
+                                                : ''
+                                            }
                                         </div>
-                                        {post.author === currentUser?.username || currentThread.author === currentUser?.username
-                                            ? <button className={ui.deleteButton} onClick={() => handlePostDeletion(post.id)} type="button">Удалить</button>
-                                            : ''
-                                        }
                                     </div>
                                 ))
                                 : <p className={ui.empty}>У этого треда пока нет постов.</p>
                             }
                         </section>
 
-
                         <section className={ui.bottomActions}>
-                            <button type="button" onClick={() => navigate(-1)} className={ui.button}>Назад</button>
+                            <button type="button" onClick={() => navigate(`/boards/${board_mark}`)} className={ui.button}>Назад</button>
                         </section>
                     </main>
 
-
                     <form onSubmit={(e) => handleMessageSending(e)} className={ui.composer}>
-                        <input type="text" placeholder="Написать..." id="message" className={ui.input} value={postContent} onChange={(e) => setPostContent(e.target.value)} required />
+                        <div className="flex flex-col gap-2">
+                            <input type="text" placeholder="Написать..." id="message" className={ui.input} value={postContent} onChange={(e) => setPostContent(e.target.value)} required />
+                            <input type="file" accept="image/*" onChange={handleFileChange} className={ui.img} />
+                        </div>
                         <button type="submit" className={ui.button}>Отправить</button>
                         {postContentErr && <p className={ui.error}>{postContentErr}</p>}
                     </form>
-
 
                     <Footer />
                 </div>

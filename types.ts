@@ -6,6 +6,12 @@ export type User = {
     password?: string | null
 }
 
+export type UserRequest = {
+    description: string | null,
+    password: string | null,
+    id?: number
+}
+
 export type Store_Users = {
     error: string | null,
     loading: boolean,
@@ -15,7 +21,7 @@ export type Store_Users = {
     register: (data:User) => Promise<Log>,
     login: (username: string, password: string) => Promise<Log>,
     logout: () => Promise<void>,
-    editUser: (data:User) => Promise<Log>,
+    editUser: (data:UserRequest) => Promise<Log>,
     deleteUser: (id: number) => Promise<Log>
 }
 
@@ -70,7 +76,9 @@ export type Thread = {
 
 export type ThreadRequest = {
     name: string,
-    description: string,
+    parent?: string | null,
+    description?: string | null,
+    author?: string | null,
     id?:number,
     password?: string | null,
     status: string
@@ -103,23 +111,20 @@ export type Post = {
     author: string | 'Аноним',
     createdAt?: string,
     parent: number // Thread.id,
-    image?: Blob | string
+    image?: Blob | string | null
 }
 
 export type PostRequest = {
     content: string,
     author: string | "Аноним",
     parent: number,
-    FormData: {
-        image_file?: Blob | null,
-        image_url?: string | null
-    }
+    image: Blob | string | null
 }
 
 export type Store_Posts = {
     error: string | null,
     loading: boolean,
-    createPost: (data: Post) => Promise<Log>,
+    createPost: (data: PostRequest) => Promise<Log>,
     deletePost: (id: number) => Promise<Log>
 }
 

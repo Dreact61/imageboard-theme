@@ -21,46 +21,50 @@
             return new WP_Error('board_not_found', 'Доска не была найдена', ["status" => 404]);
         }
 
-        $post = wp_insert_post([
-            'post_type' => 'thread',
-            'post_title' => $name,
-            'post_content' => '',
-            'post_status' => 'publish',
-            'post_author' => get_current_user_id(),
-            'meta_input' => [
-                'board_mark' => $board_mark,
-                'thread_description' => $description,
-                'thread_status' => $status,
-                'thread_author' => $author,
-                'thread_password' => $password
-            ],
-        ]);
-
-        if (is_wp_error($post)) {
-            return new WP_Error('server_error', "Ошибка на стороне сервера", ["status" => 500]);
+        if ($status === 'PRIVATE' && empty($password)) {
+            return new WP_Error('missing_fields', 'Не все важные поля были заполнены', ["status" => 400, "success" => false]);
+        } else {
+            $post = wp_insert_post([
+                'post_type' => 'thread',
+                'post_title' => $name,
+                'post_content' => '',
+                'post_status' => 'publish',
+                'post_author' => get_current_user_id(),
+                'meta_input' => [
+                    'board_mark' => $board_mark,
+                    'thread_description' => $description,
+                    'thread_status' => $status,
+                    'thread_author' => $author,
+                    'thread_password' => $password
+                ],
+            ]);
+    
+            if (is_wp_error($post)) {
+                return new WP_Error('server_error', "Ошибка на стороне сервера", ["status" => 500]);
+            }
+    
+            $result = [
+                'id' => $post,
+                'name' => $name,
+                'description' => $description,
+                'parent' => $board_mark,
+                'author' => $author,
+                'createdAt' => get_the_date('Y-m-d H:i:s', $post),
+                'status' => $status
+            ];
+    
+            return new WP_REST_Response([
+                'success' => true,
+                'thread_data' => $result,
+            ], 201);
         }
-
-        $result = [
-            'id' => $post,
-            'name' => $name,
-            'description' => $description,
-            'parent' => $board_mark,
-            'author' => $author,
-            'createdAt' => get_the_date('Y-m-d H:i:s', $post),
-            'status' => $status
-        ];
-
-        return new WP_REST_Response([
-            'success' => true,
-            'thread_data' => $result,
-        ], 201);
     }
 
     function fetch_current_thread_api(WP_REST_Request $request) {
         $id = $request->get_param('id');
 
         $thread = get_post($id);
-        if (!isset($thread)) {
+        if (!$thread) {
             return new WP_Error('server_error', 'Ошибка на стороне сервера', ["status" => 500]);
         }
 
@@ -88,10 +92,11 @@
                 'content' => $post->post_content,
                 'author' => get_post_meta($post->ID, 'post_author', true),
                 'createdAt' => get_the_date('Y-m-d H:i:s', $post->ID),
-                'parent' => $thread->ID
+                'parent' => $thread->ID,
+                'image' => get_the_post_thumbnail_url($post->ID, 'full') ?? ''
             ];
         }
-
+        
         return new WP_REST_Response([
             "success" => true,
             "thread" => $result_thread,
@@ -158,7 +163,7 @@
             'description' => $new_desc,
             'parent' => get_post_meta($thread->ID, 'board_mark', true),
             'author' => get_post_meta($thread->ID, 'thread_author', true),
-            'createdAt' => get_the_date('Y-m-n H:i:s', $thread->ID),
+            'createdAt' => get_the_date('Y-m-d H:i:s', $thread->ID),
             'status' => $new_status,
             'password' => $new_pass
         ];
@@ -201,14 +206,14 @@
         $id = $params['id'];
 
         $thread = get_post($id);
-        if (empty($thread)) {
+        if (!$thread && (!($thread instanceof WP_Post))) {
             return new WP_Error('thread_not_found', 'Тред не был найден', ["status" => 404]);
         }
 
         $thread_pass = get_post_meta($thread->ID, 'thread_password', true);
 
         if ($password !== $thread_pass) {
-            return new WP_Error('invalid_password', 'Пароль неверный.', ["status" => 403]);
+            return new WP_Error('invalid_password', 'Пароль неверный.', ["status" => 403, "password" => $thread_pass ?? 'seledka']);
         }
 
         return new WP_REST_Response([

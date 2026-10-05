@@ -85,8 +85,8 @@ export default function ThreadCreationPage() {
                 </section>
 
 
-                <section className="mb-5 flex flex-row items-start gap-2 text-[16px]">
-                    <label htmlFor="check" className={ui.text}>
+                <section className="mb-5 pt-5 flex flex-row items-start gap-2 text-[16px]">
+                    <label htmlFor="check" className={`${ui.text} text-center`}>
                         Я ознакомлен с <Link to="/rules" className={ui.link}>Правилами пользования сайта</Link> и желаю продолжить
                     </label>
                     <input type="checkbox" disabled={loading} id="check" className="mt-1 h-5 w-5 accent-violet-500" checked={isChecked} onChange={(e) => setIsChecked(!isChecked)} required />
@@ -95,7 +95,7 @@ export default function ThreadCreationPage() {
 
                 <section className="flex w-full items-center justify-evenly gap-4">
                     <button type="submit" disabled={loading} className={ui.button}>Создать</button>
-                    <Link to='/'>
+                    <Link to={`/boards/${board_mark}`}>
                         <button type="button" disabled={loading} className={ui.button}>Назад</button>
                     </Link>
                 </section>
