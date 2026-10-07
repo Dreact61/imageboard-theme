@@ -2,12 +2,10 @@ import Header from "../Parts/header"
 import Footer from "../Parts/footer"
 import { ui } from "../style-presets"
 
-
 import storeBoards from "../Stores/boardsStore"
 import { useSyncExternalStore, useEffect, useState } from "react"
 import { useParams, useNavigate, Link } from "react-router"
 import storeUsers from "../Stores/userStore"
-
 
 export default function BoardPage() {
     //NAVIGATION && PARAMS
@@ -20,28 +18,25 @@ export default function BoardPage() {
     const currentBoardThreads = useSyncExternalStore(storeBoards.subscribe, () => storeBoards.getState().currentBoardThreads, () => null)
     const fetchThisBoard = storeBoards.getState().fetchThisBoard
     const deleteBoard = storeBoards.getState().deleteBoard
-
+    const searchForThread = storeBoards.getState().searchForThread
 
     const currentUser = useSyncExternalStore(storeUsers.subscribe, () => storeUsers.getState().currentUser, () => null)
     //STATES
+    const [searchArg, setSearchArg] = useState('')
+
     const [isFetching, setIsFetching] = useState(true)
     const [status, setStatus] = useState(0)
     const [msg, setMsg] = useState('')
 
-
     const [toDelete, setToDelete] = useState(false)
-
 
     useEffect(() => {
         if (!board_mark) return
 
-
         const handleAsyncParse = async () => {
             setIsFetching(true)
 
-
             const log = await fetchThisBoard(board_mark)
-
 
             if (!log.success) {
                 setStatus(log.status)
@@ -57,9 +52,7 @@ export default function BoardPage() {
             if (!currentBoard || !currentBoard.id) return
             const boardId = currentBoard.id
 
-
             const log = await deleteBoard(boardId)
-
 
             if (log.success) {
                 alert('Доска была успешно удалена.')
@@ -73,6 +66,17 @@ export default function BoardPage() {
         }
         return
     }
+
+    const handleThreadSearch = (value: string) => {
+        const foundThreads = searchForThread(value)
+
+        if (foundThreads.length === 0) return false
+        return foundThreads
+    }
+    useEffect(() => {
+        handleThreadSearch
+        console.log(searchArg)
+    }, [searchArg])
     //RENDER
     let mainContent: any
     if (loading || isFetching) {
@@ -94,6 +98,9 @@ export default function BoardPage() {
                 <div className={ui.content}>
                     <Header />
 
+                    <section className={`${ui.main} max-w-2xs p-4 flex flex-row justify-center items-center`}>
+                        <input type="search" className={ui.input} placeholder="Поиск (Имя/ID)" value={searchArg} onChange={(e) => setSearchArg(e.target.value)} />
+                    </section>
 
                     <main className={ui.main}>
                         <section className={ui.threadInfo}>
@@ -103,38 +110,56 @@ export default function BoardPage() {
                             <small className={ui.metadata}>Время создания: {currentBoard.createdAt}</small>
                         </section>
 
-
                         <section className={`${ui.posts} border-t-2 border-border/50`}>
                             <strong className={`${ui.text} w-full border-b-2 border-border/50 pb-3 text-center`}>Треды доски</strong>
                             {currentBoardThreads && currentBoardThreads.length !== 0
-                                ? currentBoardThreads.map(thread => (
-                                    <div className={ui.card} key={thread.id}>
-                                        <strong className={ui.author}>
-                                            <Link className={ui.link} to={
-                                                thread.status === 'PUBLIC' 
-                                                ? `/boards/${board_mark}/threads/${thread.id}`
-                                                : (currentUser?.username === thread.author 
-                                                    ? `/boards/${board_mark}/threads/${thread.id}`
-                                                    : `/boards/${board_mark}/threads/${thread.id}/password`)}>{thread.name} ({thread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</Link>
-                                        </strong>
-                                        <i className={ui.description}>{thread.description ? thread.description : 'Нет описания.'}</i>
-                                        <small className={ui.metadata}>Автор: {thread.author || 'Аноним'}</small>
-                                        <small className={ui.metadata}>Создано {thread.createdAt}</small>
-                                    </div>
-                                ))
+                                ? (searchArg
+                                    ? searchForThread(searchArg).map(thread => {
+                                        if (searchForThread(searchArg).length > 0) {
+                                            return (
+                                                <div className={ui.card} key={thread.id}>
+                                                    <strong className={ui.author}>
+                                                        <Link className={ui.link} to={
+                                                            thread.status === 'PUBLIC'
+                                                                ? `/boards/${board_mark}/threads/${thread.id}`
+                                                                : (currentUser?.username === thread.author
+                                                                    ? `/boards/${board_mark}/threads/${thread.id}`
+                                                                    : `/boards/${board_mark}/threads/${thread.id}/password`)}>{thread.name} ({thread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</Link>
+                                                    </strong>
+                                                    <i className={ui.description}>{thread.description ? thread.description : 'Нет описания.'}</i>
+                                                    <small className={ui.metadata}>Автор: {thread.author || 'Аноним'}</small>
+                                                    <small className={ui.metadata}>Создано {thread.createdAt}</small>
+                                                </div>
+                                            )
+                                        } else {
+                                            <p className={ui.text}>Ни один тред не был найден.</p>
+                                        }
+                                    })
+                                    : currentBoardThreads.map(thread => (
+                                        <div className={ui.card} key={thread.id}>
+                                            <strong className={ui.author}>
+                                                <Link className={ui.link} to={
+                                                    thread.status === 'PUBLIC'
+                                                        ? `/boards/${board_mark}/threads/${thread.id}`
+                                                        : (currentUser?.username === thread.author
+                                                            ? `/boards/${board_mark}/threads/${thread.id}`
+                                                            : `/boards/${board_mark}/threads/${thread.id}/password`)}>{thread.name} ({thread.status === 'PUBLIC' ? 'Публичный' : 'Приватный'})</Link>
+                                            </strong>
+                                            <i className={ui.description}>{thread.description ? thread.description : 'Нет описания.'}</i>
+                                            <small className={ui.metadata}>Автор: {thread.author || 'Аноним'}</small>
+                                            <small className={ui.metadata}>Создано {thread.createdAt}</small>
+                                        </div>
+                                    ))
+                                )
                                 : <p className={ui.empty}>У этой доски пока нет тредов.</p>
                             }
                         </section>
-
 
                         <section className={`${ui.bottomActions} gap-4`}>
                             <button type="button" onClick={() => navigate(`/boards/${board_mark}/threads/create`)} className={ui.button}>Создать тред</button>
                             <button type="button" onClick={() => navigate('/')} className={ui.button}>Назад</button>
                         </section>
-
-
                     </main>
-
 
                     {currentUser && (currentUser.username === currentBoard.author || currentUser.role === 'admin')
                         ?
@@ -144,8 +169,6 @@ export default function BoardPage() {
                         </section>
                         : ''
                     }
-
-
 
                     <Footer />
                 </div>

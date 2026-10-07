@@ -56,7 +56,9 @@ export type Store_Boards = {
     fetchThisBoard: (mark: string) => Promise<Log>,
     createNewBoard: (data:Board) => Promise<Log>,
     editBoard: (id: number, data: BoardRequest) => Promise<Log>,
-    deleteBoard: (id: number) => Promise<Log>
+    deleteBoard: (id: number) => Promise<Log>,
+    searchForBoard: (arg: string) => Board[]
+    searchForThread: (arg: string) => Thread[]
 }
 
 //=========================

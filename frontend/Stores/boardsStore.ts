@@ -268,6 +268,40 @@ const storeBoards = create<Store_Boards>((set, get) => ({
         } finally {
             set({loading: false})
         }
+    },
+
+    searchForBoard: (arg) => {
+        const {allBoards} = get()
+        const preparedArg = arg.trim().toLowerCase()
+
+        let allFoundResult = []
+        for (let board of allBoards) {
+            if (board.name.toLowerCase().startsWith(preparedArg)) {
+                allFoundResult.push(board)
+            } else if (board.mark.startsWith(preparedArg)) {
+                allFoundResult.unshift(board)
+            } else if (board.id === Number(preparedArg)) {
+                allFoundResult.push(board)
+            }
+        } 
+
+        return allFoundResult
+    },
+
+    searchForThread: (arg) => {
+        const {currentBoardThreads} = get()
+        const preparedArg = arg.trim().toLowerCase()
+
+        let allFoundResult = []
+        for (let thread of currentBoardThreads) {
+            if (thread.name.toLowerCase().startsWith(preparedArg)) {
+                allFoundResult.push(thread)
+            } else if (thread.id === Number(preparedArg)) {
+                allFoundResult.push(thread)
+            }
+        }
+
+        return allFoundResult
     }
 }))
 
